@@ -82,14 +82,18 @@
   }
   function clearAllPreviews() { Object.keys(previewURLs).forEach(clearPreview); }
 
+  // Chemin d'affichage : un chemin relatif ('assets/…') est rendu absolu ('/assets/…')
+  // pour s'afficher correctement quelle que soit l'URL de la page admin.
+  const mediaUrl = (v) => (v && !/^https?:/i.test(v) && v.charAt(0) !== '/' && v.indexOf('blob:') !== 0) ? '/' + v : v;
+
   function mediaThumb(slot, value) {
     const pend = pending.get(slot);
     if (!pend && !value) return '';
     const file = pend && pend.file;
-    const src = pend ? previewURLs[slot] : value;
+    const src = pend ? previewURLs[slot] : mediaUrl(value);
     const name = pend ? pend.file.name : value;
     const inner = isImg(value, file)
-      ? '<img src="' + esc(src) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'" />'
+      ? '<img src="' + esc(src) + '" alt="" onerror="this.style.display=\'none\'" />'
       : '<span class="filechip">▸</span>';
     return '<div class="thumb">' + inner +
       '<span class="thumb-name">' + esc(name) + (pend ? ' · à enregistrer' : '') + '</span>' +
