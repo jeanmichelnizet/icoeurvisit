@@ -157,7 +157,7 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
   {
     "media": {
       "video": null,
-      "photo360": null,
+      "photo360": "https://www.youtube.com/watch?v=GtpjJtcwbns",
       "image": null,
       "images": []
     },
