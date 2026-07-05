@@ -13,7 +13,7 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
   {
     "media": {
       "video": null,
-      "photo360": null,
+      "photo360": "https://www.youtube.com/watch?v=GtpjJtcwbns",
       "image": "assets/photos/mat-matage-imoca-initiatives-c-ur-quatrieme-du-nom-09.jpg",
       "images": [
         "assets/photos/mat-matage-imoca-initiatives-c-ur-quatrieme-du-nom-09.jpg"
