@@ -48,7 +48,7 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
     "media": {
       "video": null,
       "photo360": null,
-      "image": null
+      "image": "assets/photos/foil-babord.png"
     },
     "num": 2,
     "snapToSurface": false,
