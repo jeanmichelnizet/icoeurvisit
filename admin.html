@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Administration · Initiatives-Cœur</title>
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
+<style>
+  :root{
+    --paper:#eef1f5; --card:#fff; --ink:#0c1c34; --muted:#5b6b82;
+    --line:#dbe1ea; --line-2:#c7d0de; --accent:#e30613; --accent-2:#a6050f;
+    --ok:#0e7457; --ok-bg:#e4f1eb; --warn:#9a6410; --warn-bg:#f7eedb; --danger:#c1121f;
+    --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;font-size:15px}
+  a{color:var(--accent-2)}
+
+  header.top{
+    position:sticky;top:0;z-index:20;background:#071429;color:#eef2f8;
+    padding:14px 22px;display:flex;flex-wrap:wrap;gap:14px 18px;align-items:center;
+    border-bottom:3px solid var(--accent);
+  }
+  header.top .brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+  header.top .brand svg{width:26px;height:26px;display:block}
+  header.top .brand b{font-weight:600}
+  header.top .brand small{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9fb0c8}
+  .status{font-family:var(--mono);font-size:12px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);color:#c4d0e0}
+  .status.ok{background:var(--ok-bg);color:var(--ok)}
+  .status.warn{background:var(--warn-bg);color:var(--warn)}
+
+  .btn{font:inherit;font-weight:600;font-size:13px;border:1px solid transparent;border-radius:8px;padding:9px 16px;cursor:pointer;transition:.15s}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.primary:hover{background:var(--accent-2)}
+  .btn.primary:disabled{opacity:.5;cursor:default}
+  .btn.line{background:transparent;color:#eef2f8;border-color:rgba(255,255,255,.3)}
+  .btn.line:hover{border-color:#fff}
+  .btn.ghost{background:transparent;color:var(--accent-2);border:1px dashed var(--line-2);border-radius:10px;padding:12px;width:100%;margin-top:10px}
+  .btn.ghost:hover{border-color:var(--accent);background:#fff}
+
+  main{max-width:900px;margin:0 auto;padding:26px 22px 90px}
+  .help{background:#fff;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:16px 20px;margin-bottom:26px;font-size:14px;color:var(--muted)}
+  .help b{color:var(--ink)}
+  .help ol{margin:8px 0 0;padding-left:20px}
+  .help li{margin:3px 0}
+
+  h2.sec{font-size:19px;margin:30px 0 6px;letter-spacing:-.01em}
+  .sec-note{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+
+  details.card{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden}
+  details.card[open]{box-shadow:0 10px 26px -20px rgba(7,20,41,.5)}
+  summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 18px;font-weight:600}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"▸";margin-left:auto;color:var(--muted);transition:.15s}
+  details[open] summary::after{transform:rotate(90deg)}
+  summary .num{font-family:var(--mono);font-size:12px;font-weight:600;color:#fff;background:var(--accent);border-radius:6px;padding:3px 7px}
+  .card-body{padding:6px 18px 20px;border-top:1px solid var(--line)}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:14px}
+  .col h4,.media-title{font-size:12px;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+  .media-title{margin:22px 0 10px}
+  .fld{display:block;margin-bottom:12px}
+  .fld>span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  .fld input,.fld textarea,.urlin{width:100%;font:inherit;font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line-2);border-radius:8px;padding:9px 11px}
+  .fld textarea{resize:vertical;line-height:1.5}
+  input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+
+  .media-row{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px;background:#fafbfc}
+  .media-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .mlabel{font-weight:600;font-size:13px}
+  .mcur{font-family:var(--mono);font-size:12px;color:var(--muted);word-break:break-all}
+  .mcur em{color:var(--line-2);font-style:normal}
+  .media-inputs{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .filebtn{font-size:13px;font-weight:600;border:1px solid var(--line-2);border-radius:8px;padding:8px 12px;cursor:pointer;background:#fff;white-space:nowrap}
+  .filebtn:hover{border-color:var(--accent)}
+  .filebtn input[type=file]{display:none}
+  .filebtn:has(input:disabled){opacity:.5;cursor:default}
+  .or{color:var(--muted);font-size:12px}
+  .urlin{flex:1;min-width:180px}
+  .link{background:none;border:none;font:inherit;font-size:12px;cursor:pointer;color:var(--muted);text-decoration:underline;padding:0}
+  .link.danger{color:var(--danger)}
+
+  .pano{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:12px}
+
+  .phase2{background:#fff;border:1px dashed var(--line-2);border-radius:12px;padding:18px 20px;color:var(--muted);font-size:14px}
+  .phase2 b{color:var(--ink)}
+
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;
+    background:#071429;color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;max-width:88vw;text-align:center;
+    box-shadow:0 12px 30px -10px rgba(0,0,0,.5);transition:.25s}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.ok{background:var(--ok)}
+  .toast.warn{background:var(--warn)}
+  .toast.err{background:var(--danger)}
+
+  @media (max-width:680px){ .cols{grid-template-columns:1fr;gap:8px} }
+</style>
+<script src="assets/js/content.js" defer></script>
+<script src="assets/js/admin.js" defer></script>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 21s-7-4.5-7-11a7 7 0 0 1 14 0c0 6.5-7 11-7 11z" fill="#E30613"/>
+      <path d="M12 14l-2-2a1.5 1.5 0 0 1 2-2.2A1.5 1.5 0 0 1 14 12l-2 2z" fill="#fff"/>
+    </svg>
+    <span><b>Administration</b><small>Initiatives-Cœur · contenu</small></span>
+  </div>
+  <span class="status" id="conn-status">Non connecté</span>
+  <button class="btn line" id="connect-btn">Connecter le dossier</button>
+  <button class="btn primary" id="save-btn">Enregistrer</button>
+</header>
+
+<main>
+  <div class="help">
+    <b>Comment ça marche</b>
+    <ol>
+      <li>Ce panneau modifie le contenu de la visite (textes, photos, vidéos, 360°) directement dans le dossier du projet.</li>
+      <li>Clique <b>« Connecter le dossier »</b> et choisis le dossier du projet (celui qui contient <code>index.html</code>). À faire une fois par session.</li>
+      <li>Modifie les textes, ajoute des fichiers (ou colle un lien externe), puis clique <b>« Enregistrer »</b>.</li>
+      <li>Recharge la visite pour vérifier, puis redéploie le dossier pour publier en ligne.</li>
+    </ol>
+    Fonctionne dans <b>Chrome</b> ou <b>Edge</b> (pas Safari). Les positions 3D des points sont préservées : ce panneau ne touche qu'aux textes et médias.
+  </div>
+
+  <h2 class="sec">Points de la visite 3D</h2>
+  <p class="sec-note">Les 8 points commentés du bateau. Titre, sur-titre et description en français et en anglais, plus les médias associés.</p>
+  <div id="hotspots"></div>
+
+  <h2 class="sec">Panoramas 360° (bouton « 360° » plein écran)</h2>
+  <p class="sec-note">Images ou vidéos équirectangulaires ouvertes depuis le bouton « 360° » en haut de la visite. Fichier local ou lien externe.</p>
+  <div id="panoramas"></div>
+
+  <h2 class="sec">Vues 3D intérieures</h2>
+  <p class="sec-note">Scènes 3D (Gaussian splats) hébergées sur <b>superspl.at</b>, affichées en embed. Chaque scène ajoute un bouton dans la visite, à côté de « 3D / 360° / Vidéo ». Colle l'<b>id</b> de la scène (ex. <code>a90175ab</code>) ou son lien complet.</p>
+  <div id="scenes"></div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

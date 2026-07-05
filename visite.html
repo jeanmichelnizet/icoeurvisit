@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr" data-i18n-title="visite.title">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+<meta name="theme-color" content="#040d24" />
+<title>Visite immersive · Initiatives-Cœur</title>
+<meta name="description" content="Montez à bord de l’IMOCA Initiatives-Cœur de Violette Dorange : visite 3D interactive avec audio guidé." />
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="assets/icons/icon-180.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css" />
+
+<!-- Three.js r128 — auto-hébergé dans assets/vendor/ (aucune dépendance CDN au
+     runtime : indispensable sur le réseau mobile saturé des villages de course). -->
+<script src="assets/vendor/three.min.js"></script>
+<script src="assets/vendor/OrbitControls.js"></script>
+<script src="assets/vendor/GLTFLoader.js"></script>
+
+<!-- Analytics de production : décommentez et renseignez le domaine une fois déployé.
+     analytics.js détecte automatiquement window.plausible et lui transmet les events. -->
+<!-- <script defer data-domain="visite.initiatives-coeur.fr" src="https://plausible.io/js/script.js"></script> -->
+
+<script src="assets/js/i18n.js" defer></script>
+<script src="assets/js/analytics.js" defer></script>
+<script src="assets/js/content.js" defer></script>
+</head>
+<body style="overflow:hidden">
+<div class="ambient-bg"></div>
+
+<header class="topbar">
+  <a href="index.html" class="back-link"><span>←</span> <span data-i18n="nav.back">Retour</span></a>
+  <div class="header-right">
+    <nav class="nav-actions">
+      <button class="lang-switch active" data-lang="fr">FR</button>
+      <button class="lang-switch" data-lang="en">EN</button>
+    </nav>
+    <div class="brand">
+      <span class="brand-text" style="text-align:right">
+        <span class="eyebrow" data-i18n="visite.brand.eyebrow">Visite immersive</span>
+        <span class="title">Initiatives <b>Cœur</b></span>
+      </span>
+    </div>
+  </div>
+</header>
+
+<div class="visite-shell" style="top:0">
+  <div class="visite-stage">
+    <!-- 3D canvas -->
+    <div id="three-canvas"></div>
+
+    <!-- Loader -->
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+      <div class="label" data-i18n="visite.loader">Chargement du bateau · 3,5 Mo</div>
+      <div class="loader-bar"><span class="loader-bar-fill" id="loader-bar-fill"></span></div>
+    </div>
+
+    <!-- Mode switcher -->
+    <div class="mode-switch" role="tablist">
+      <button class="active" data-mode="3d" role="tab" aria-selected="true">3D</button>
+      <button data-mode="360" role="tab" aria-selected="false">360°</button>
+      <button data-mode="video" role="tab" aria-selected="false" data-i18n="visite.mode.video">Vidéo</button>
+    </div>
+
+    <!-- Leader lines (SVG) — anchors on the boat + lines to labels -->
+    <svg class="leaders-svg" id="leaders-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+
+    <!-- Hotspots layer (DOM "callout" labels projected over canvas) -->
+    <div class="hotspots-layer" id="hotspots-layer"></div>
+
+    <!-- Edit toolbar (?edit mode) -->
+    <aside class="edit-toolbar" id="edit-toolbar">
+      <h4>Mode positionnement</h4>
+      <p>Cliquez un numéro, puis ajustez X / Y / Z. Snap désactivé.</p>
+      <div class="edit-palette" id="edit-palette"></div>
+      <div class="selected-info" id="edit-selected">Sélectionnez un hotspot ci-dessus</div>
+
+      <label>X · bâbord ↔ tribord</label>
+      <div class="slider-row">
+        <input type="range" id="edit-x" min="0" max="1" step="0.002" value="0.5" disabled />
+        <span class="slider-val" id="edit-x-val">·</span>
+      </div>
+
+      <label>Y · quille ↕ haut du mât</label>
+      <div class="slider-row">
+        <input type="range" id="edit-y" min="0" max="1" step="0.002" value="0.5" disabled />
+        <span class="slider-val" id="edit-y-val">·</span>
+      </div>
+
+      <label>Z · poupe ↔ étrave</label>
+      <div class="slider-row">
+        <input type="range" id="edit-z" min="0" max="1" step="0.002" value="0.5" disabled />
+        <span class="slider-val" id="edit-z-val">·</span>
+      </div>
+
+      <label>Distance étiquette · proche ↔ loin</label>
+      <div class="slider-row">
+        <input type="range" id="edit-lead-len" min="0.20" max="3.0" step="0.02" value="1" disabled />
+        <span class="slider-val" id="edit-lead-len-val">·</span>
+      </div>
+
+      <div class="row">
+        <button id="edit-flip-z" class="secondary" title="Inverser poupe/étrave">↔ flip Z</button>
+        <button id="edit-flip-x" class="secondary" title="Inverser bâbord/tribord">↔ flip X</button>
+      </div>
+      <button id="edit-capture-view" disabled>📷 Capturer la vue actuelle</button>
+      <button id="edit-export">📋 Copier toutes les positions</button>
+      <button id="edit-quit" class="secondary">Quitter</button>
+    </aside>
+
+    <!-- Chip list (mobile-friendly hotspot index at the bottom) -->
+    <nav class="hotspot-list" id="hotspot-list"></nav>
+
+    <!-- Idle hint -->
+    <div class="hint" id="hint" data-i18n="visite.hint">Faites tourner · touchez un point lumineux</div>
+  </div>
+</div>
+
+<!-- Hotspot detail panel -->
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="panel-title">
+  <div class="panel-handle"></div>
+  <header class="panel-header">
+    <div>
+      <div class="panel-eyebrow" id="panel-eyebrow">·</div>
+      <h2 class="panel-title" id="panel-title">·</h2>
+    </div>
+    <button class="panel-close" id="panel-close" aria-label="Fermer" data-i18n-attr="aria-label:visite.aria.close">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M1 1l12 12M13 1L1 13"/>
+      </svg>
+    </button>
+  </header>
+
+  <div class="panel-body">
+    <!-- Audio player -->
+    <div class="audio-player">
+      <button class="audio-btn" id="audio-btn" aria-label="Écouter" data-i18n-attr="aria-label:visite.aria.listen">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <div class="audio-info">
+        <div class="audio-label" id="audio-label">Écouter la description</div>
+        <div class="audio-progress"><span id="audio-progress-fill"></span></div>
+      </div>
+    </div>
+
+    <p id="panel-text">·</p>
+
+    <!-- Media tabs -->
+    <nav class="media-tabs" role="tablist">
+      <button class="media-tab active" data-media="text" role="tab" aria-selected="true" data-i18n="visite.tab.text">Texte</button>
+      <button class="media-tab" data-media="video" role="tab" aria-selected="false" disabled data-i18n="visite.tab.video">Vidéo Violette</button>
+      <button class="media-tab" data-media="360" role="tab" aria-selected="false" disabled data-i18n="visite.tab.360">Vue 360°</button>
+      <button class="media-tab" data-media="image" role="tab" aria-selected="false" disabled data-i18n="visite.tab.image">Photo</button>
+    </nav>
+    <div class="media-content" id="media-content">
+      <!-- populated by JS -->
+    </div>
+
+    <!-- Guided-tour navigation (previous / counter / next) -->
+    <nav class="panel-nav">
+      <button class="panel-nav-btn" id="panel-prev" data-i18n="visite.nav.prev">‹ Précédent</button>
+      <span class="panel-nav-count" id="panel-nav-count">1 / 8</span>
+      <button class="panel-nav-btn" id="panel-next" data-i18n="visite.nav.next">Suivant ›</button>
+    </nav>
+  </div>
+</aside>
+
+<script src="assets/js/panorama.js" defer></script>
+<script src="assets/js/visite.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr" data-i18n-title="index.title">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#040d24" />
+<title>Initiatives-Cœur · Bienvenue à bord</title>
+<meta name="description" content="Visitez virtuellement l’IMOCA Initiatives-Cœur de Violette Dorange. Défier les océans pour sauver des enfants." />
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="assets/icons/icon-180.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<!-- Open Graph / partage réseaux sociaux — remplacez le domaine par l’URL de production réelle. -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Initiatives-Cœur · le bateau de Violette Dorange" />
+<meta property="og:description" content="Visite 3D immersive de l’IMOCA Initiatives-Cœur. Défier les océans pour sauver des enfants." />
+<meta property="og:image" content="https://visite.initiatives-coeur.fr/assets/images/bateau-en-mer.webp" />
+<meta property="og:url" content="https://visite.initiatives-coeur.fr/" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css" />
+
+<!-- Analytics de production : décommentez et renseignez le domaine une fois déployé. -->
+<!-- <script defer data-domain="visite.initiatives-coeur.fr" src="https://plausible.io/js/script.js"></script> -->
+
+<script src="assets/js/i18n.js" defer></script>
+<script src="assets/js/analytics.js" defer></script>
+</head>
+<body>
+<div class="ambient-bg"></div>
+
+<header class="topbar">
+  <a href="index.html" class="brand">
+    <span class="brand-logo">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 21s-7-4.5-7-11a7 7 0 0 1 14 0c0 6.5-7 11-7 11z" fill="#E30613"/>
+        <path d="M12 14l-2-2a1.5 1.5 0 0 1 2-2.2A1.5 1.5 0 0 1 14 12l-2 2z" fill="#fff"/>
+      </svg>
+    </span>
+    <span class="brand-text">
+      <span class="eyebrow" data-i18n="brand.imoca">Imoca · 60 pieds</span>
+      <span class="title">Initiatives <b>Cœur</b></span>
+    </span>
+  </a>
+  <nav class="nav-actions">
+    <button class="lang-switch active" data-lang="fr">FR</button>
+    <button class="lang-switch" data-lang="en">EN</button>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <p class="eyebrow" data-i18n="index.hero.eyebrow">Bienvenue à bord</p>
+    <h1 data-i18n-html="index.hero.h1">Le bateau de <b>Violette Dorange</b></h1>
+    <p class="baseline" data-i18n="index.hero.baseline">« Défier les océans pour sauver des enfants. »</p>
+    <p data-i18n="index.hero.intro">Le bateau est inaccessible aujourd’hui — mais tout son univers tient dans votre main. Choisissez par où commencer.</p>
+  </section>
+
+  <section class="tiles" id="tiles">
+    <a href="visite.html" class="tile featured" data-track="tile:visite">
+      <span class="tile-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ff2c3a" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+      </span>
+      <span class="tile-num" data-i18n="index.t1.num">01 · Visite immersive</span>
+      <h2 data-i18n-html="index.t1.h2">Monter à bord <b>en 3D</b></h2>
+      <p data-i18n="index.t1.p">Tournez autour du bateau, explorez ses huit points-clés : foils, quille, cockpit, mât, safrans, et plus encore. Avec audio guidé.</p>
+      <span class="tile-cta" data-i18n="index.t1.cta">Démarrer la visite</span>
+    </a>
+
+    <a href="projet.html" class="tile" data-track="tile:projet">
+      <span class="tile-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ff2c3a" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      </span>
+      <span class="tile-num" data-i18n="index.t2.num">02 · Le projet</span>
+      <h2 data-i18n-html="index.t2.h2">Violette & <b>l’aventure</b></h2>
+      <p data-i18n="index.t2.p">La skippeuse, ses objectifs sportifs, la Route du Rhum, le Vendée Globe 2028, et la double dimension humanitaire du projet.</p>
+      <span class="tile-cta" data-i18n="index.t2.cta">Découvrir</span>
+    </a>
+
+    <a href="mecenat.html" class="tile" data-track="tile:mecenat">
+      <span class="tile-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ff2c3a" stroke-width="1.6"><path d="M12 21s-7-4.5-7-11a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 6.5-7 11-7 11z"/></svg>
+      </span>
+      <span class="tile-num" data-i18n="index.t3.num">03 · Mécénat</span>
+      <h2 data-i18n-html="index.t3.h2">Chirurgie <b>Cardiaque</b></h2>
+      <p data-i18n="index.t3.p">Plus de cinq cents enfants sauvés grâce au projet. Comment fonctionne l’association partenaire, et comment chaque mille parcouru compte.</p>
+      <span class="tile-cta" data-i18n="index.t3.cta">En savoir plus</span>
+    </a>
+
+    <a href="sponsors.html" class="tile" data-track="tile:sponsors">
+      <span class="tile-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ff2c3a" stroke-width="1.6"><path d="M4 8h16M4 12h16M4 16h10"/><circle cx="6" cy="6" r="1" fill="#ff2c3a"/></svg>
+      </span>
+      <span class="tile-num" data-i18n="index.t4.num">04 · Sponsors</span>
+      <h2 data-i18n-html="index.t4.h2">Les <b>mécènes</b></h2>
+      <p data-i18n="index.t4.p">Ils rendent possible le projet sportif et solidaire. Découvrez les marques engagées aux côtés d’Initiatives-Cœur.</p>
+      <span class="tile-cta" data-i18n="index.t4.cta">Voir les sponsors</span>
+    </a>
+  </section>
+</main>
+
+</body>
+</html>

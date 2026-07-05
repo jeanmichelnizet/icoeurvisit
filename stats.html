@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Statistiques · Initiatives-Cœur</title>
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css" />
+<style>
+  .stats-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  .stats-table th, .stats-table td {
+    text-align: left; padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .stats-table th {
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .stats-table td.num { text-align: right; color: var(--rouge-soft); font-weight: 500; }
+  .bar { display: inline-block; height: 6px; background: var(--rouge-soft); border-radius: 3px; vertical-align: middle; margin-right: 8px; }
+  .empty {
+    text-align: center; padding: 48px 22px;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-md);
+    margin: 20px 0;
+  }
+  .toolbar { display: flex; gap: 10px; margin: 18px 0; flex-wrap: wrap; }
+  .btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ivory);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 9px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--rouge-soft); }
+  .btn.primary { background: var(--rouge); border-color: var(--rouge); color: white; }
+</style>
+</head>
+<body>
+<div class="ambient-bg"></div>
+
+<header class="topbar">
+  <a href="index.html" class="back-link"><span>←</span> Retour</a>
+  <div class="brand">
+    <span class="brand-text" style="text-align:right">
+      <span class="eyebrow">Admin</span>
+      <span class="title">Statistiques</span>
+    </span>
+  </div>
+</header>
+
+<main class="page">
+  <section class="page-section">
+    <p class="eyebrow">Dashboard</p>
+    <h1>Ce que regardent les <b>visiteurs</b></h1>
+    <p class="lead">Vue locale des événements collectés. Pour une vraie remontée temps-réel agrégée sur tous les visiteurs, branchez <a href="https://plausible.io" target="_blank" rel="noopener" style="color:var(--rouge-soft)">Plausible</a> (RGPD, sans cookie) en ajoutant son script dans le <code>&lt;head&gt;</code> des pages.</p>
+
+    <div class="toolbar">
+      <button class="btn primary" id="refresh">↻ Rafraîchir</button>
+      <button class="btn" id="export">⬇ Export JSON</button>
+      <button class="btn" id="clear">✗ Vider</button>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <h2>Pages les plus <b>visitées</b></h2>
+    <div id="pages-block"></div>
+  </section>
+
+  <section class="page-section">
+    <h2>Hotspots les plus <b>ouverts</b></h2>
+    <div id="hotspots-block"></div>
+  </section>
+
+  <section class="page-section">
+    <h2>Médias les plus <b>consommés</b></h2>
+    <div id="media-block"></div>
+  </section>
+
+  <section class="page-section">
+    <h2>Activité <b>brute</b> (50 derniers événements)</h2>
+    <div id="raw-block"></div>
+  </section>
+</main>
+
+<script>
+function getEvents() {
+  try { return JSON.parse(localStorage.getItem('ic:events') || '[]'); }
+  catch(e) { return []; }
+}
+
+function aggregate(events, filter, key) {
+  const counts = {};
+  events.filter(filter).forEach(e => {
+    const k = typeof key === 'function' ? key(e) : e[key];
+    counts[k] = (counts[k] || 0) + 1;
+  });
+  return Object.entries(counts).sort((a,b) => b[1] - a[1]);
+}
+
+function renderTable(target, rows, columns, max) {
+  const el = document.getElementById(target);
+  if (!rows.length) {
+    el.innerHTML = `<div class="empty">Aucune donnée pour le moment. Naviguez dans l’application pour voir les statistiques apparaître ici.</div>`;
+    return;
+  }
+  const top = Math.max(...rows.map(r => r[1]));
+  const head = `<tr><th>${columns[0]}</th><th style="text-align:right">${columns[1]}</th></tr>`;
+  const body = rows.slice(0, max || 20).map(([label, count]) => {
+    const pct = top ? (count / top * 100) : 0;
+    return `<tr>
+      <td><span class="bar" style="width:${pct * 1.2}px"></span>${label}</td>
+      <td class="num">${count}</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `<table class="stats-table">${head}${body}</table>`;
+}
+
+function render() {
+  const events = getEvents();
+
+  renderTable('pages-block',
+    aggregate(events, e => e.name === 'pageview', e => e.props.path || e.page),
+    ['Page', 'Vues']
+  );
+
+  renderTable('hotspots-block',
+    aggregate(events, e => e.name === 'hotspot:open', e => `${String(e.props.num).padStart(2,'0')} — ${e.props.title}`),
+    ['Hotspot', 'Ouvertures']
+  );
+
+  renderTable('media-block',
+    aggregate(events, e => e.name === 'media:view', e => e.props.media),
+    ['Type de média', 'Consultations']
+  );
+
+  const raw = events.slice(-50).reverse();
+  if (!raw.length) {
+    document.getElementById('raw-block').innerHTML = `<div class="empty">Aucun événement.</div>`;
+  } else {
+    const rows = raw.map(e => `<tr>
+      <td style="color:var(--muted)">${new Date(e.t).toLocaleTimeString('fr-FR')}</td>
+      <td>${e.name}</td>
+      <td style="color:var(--muted)">${JSON.stringify(e.props)}</td>
+    </tr>`).join('');
+    document.getElementById('raw-block').innerHTML = `<table class="stats-table">
+      <tr><th>Heure</th><th>Événement</th><th>Détails</th></tr>${rows}
+    </table>`;
+  }
+}
+
+document.getElementById('refresh').addEventListener('click', render);
+document.getElementById('clear').addEventListener('click', () => {
+  if (confirm('Vider toutes les statistiques locales ?')) {
+    localStorage.removeItem('ic:events');
+    render();
+  }
+});
+document.getElementById('export').addEventListener('click', () => {
+  const data = JSON.stringify(getEvents(), null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `initiatives-coeur-stats-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+});
+
+render();
+</script>
+</body>
+</html>

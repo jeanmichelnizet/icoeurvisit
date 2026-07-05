@@ -1,0 +1,18 @@
+{
+  "name": "Initiatives-Cœur — Visite virtuelle",
+  "short_name": "Initiatives-Cœur",
+  "description": "Visite 3D immersive de l'IMOCA Initiatives-Cœur de Violette Dorange.",
+  "lang": "fr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#040d24",
+  "theme_color": "#040d24",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/icons/favicon.svg", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

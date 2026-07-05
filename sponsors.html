@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr" data-i18n-title="sponsors.title">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#040d24" />
+<title>Sponsors & mécènes · Initiatives-Cœur</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="assets/icons/icon-180.png" />
+<link rel="stylesheet" href="assets/css/styles.css" />
+<!-- Analytics de production : décommentez et renseignez le domaine une fois déployé. -->
+<!-- <script defer data-domain="visite.initiatives-coeur.fr" src="https://plausible.io/js/script.js"></script> -->
+<script src="assets/js/i18n.js" defer></script>
+<script src="assets/js/analytics.js" defer></script>
+</head>
+<body>
+<div class="ambient-bg"></div>
+
+<header class="topbar">
+  <a href="index.html" class="back-link"><span>←</span> <span data-i18n="nav.back">Retour</span></a>
+  <div class="header-right">
+    <nav class="nav-actions">
+      <button class="lang-switch active" data-lang="fr">FR</button>
+      <button class="lang-switch" data-lang="en">EN</button>
+    </nav>
+    <div class="brand">
+      <span class="brand-text" style="text-align:right">
+        <span class="eyebrow" data-i18n="sponsors.brand.eyebrow">Les mécènes</span>
+        <span class="title">Initiatives <b>Cœur</b></span>
+      </span>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <section class="page-section">
+    <p class="eyebrow" data-i18n="sponsors.s1.eyebrow">Sans eux, rien ne serait possible</p>
+    <h1 data-i18n-html="sponsors.s1.h1">Les marques <b>engagées</b></h1>
+    <p class="lead" data-i18n="sponsors.s1.lead">Chaque sponsor d’Initiatives-Cœur ne soutient pas seulement une équipe sportive — il finance directement les opérations chirurgicales d’enfants accueillis par Mécénat Chirurgie Cardiaque. Voici les marques qui, par leur engagement, transforment chaque mille parcouru en vie sauvée.</p>
+  </section>
+
+  <section class="page-section">
+    <h2 data-i18n-html="sponsors.s2.h2">Partenaires <b>principaux</b></h2>
+    <div class="sponsor-grid">
+      <div class="sponsor-card">
+        <img class="sponsor-logo" alt="Chocolats du Cœur"
+             src="assets/images/sponsors/chocolats-du-coeur.svg"
+             onload="this.closest('.sponsor-card').classList.add('has-logo')"
+             onerror="if(!this.dataset.r){this.dataset.r=1;this.src='assets/images/sponsors/chocolats-du-coeur.png'}else{this.remove()}" />
+        <div class="logo">Chocolats du Cœur</div>
+        <span class="role" data-i18n="sponsors.card.main">Partenaire principal</span>
+      </div>
+      <div class="sponsor-card">
+        <img class="sponsor-logo" alt="K-Line"
+             src="assets/images/sponsors/k-line.svg"
+             onload="this.closest('.sponsor-card').classList.add('has-logo')"
+             onerror="if(!this.dataset.r){this.dataset.r=1;this.src='assets/images/sponsors/k-line.png'}else{this.remove()}" />
+        <div class="logo">K-Line</div>
+        <span class="role" data-i18n="sponsors.card.tech">Partenaire technique</span>
+      </div>
+      <div class="sponsor-card" style="opacity:.55;border-style:dashed">
+        <div class="logo" data-i18n="sponsors.card.yourbrand">Votre marque</div>
+        <span class="role" data-i18n="sponsors.card.free">Espace disponible</span>
+      </div>
+      <div class="sponsor-card" style="opacity:.55;border-style:dashed">
+        <div class="logo" data-i18n="sponsors.card.yourbrand">Votre marque</div>
+        <span class="role" data-i18n="sponsors.card.free">Espace disponible</span>
+      </div>
+    </div>
+    <p style="margin-top:24px;color:var(--muted);font-size:0.9rem"><em data-i18n="sponsors.s2.note">Les logos officiels seront intégrés ici quand vous fournirez les fichiers SVG/PNG haute résolution.</em></p>
+  </section>
+
+  <section class="page-section">
+    <h2 data-i18n-html="sponsors.s3.h2">Devenir <b>mécène</b></h2>
+    <p data-i18n="sponsors.s3.p">Vous représentez une marque sensible aux valeurs de dépassement, d’engagement et de solidarité ? Le projet Initiatives-Cœur offre une visibilité internationale à travers les plus grandes courses au large, tout en s’inscrivant dans une démarche philanthropique concrète et mesurable.</p>
+    <p><a href="https://www.initiatives-coeur.fr" target="_blank" rel="noopener" style="color:var(--rouge-soft);text-decoration:underline" data-track="link:contact" data-i18n="sponsors.s3.cta">Contacter l’équipe →</a></p>
+  </section>
+</main>
+</body>
+</html>
