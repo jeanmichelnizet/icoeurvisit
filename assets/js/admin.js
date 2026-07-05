@@ -1,20 +1,22 @@
 // ============================================================
-// admin.js — local back-office (runs in the browser, writes to the
-// project folder via the File System Access API). No server needed.
+// admin.js — back-office EN LIGNE. Écrit content.json (+ médias) dans
+// GitHub via l'API, ce qui déclenche la publication automatique Netlify.
 // ----------------------------------------------------------------
-// Workflow:
-//   1. Serve the project (python3 -m http.server 8080) and open
-//      http://localhost:8080/admin.html in Chrome or Edge.
-//   2. "Connecter le dossier" → pick the project root, grant write access.
-//   3. Edit texts / add photos, videos, 360° (file or URL).
-//   4. "Enregistrer" → writes media into assets/ and regenerates
-//      assets/js/content.js. Reload the visit to see it, then redeploy.
-// Source of truth stays assets/js/content.js (also read by the app and by
-// generate_audio.py); this panel only rewrites it — calibration (positions,
-// viewDir…) is preserved untouched.
+// Connexion : « Se connecter à GitHub » ouvre l'OAuth Netlify (le même
+// que celui configuré pour le site) → jeton stocké pour la session.
+// Enregistrer : commit de content.json (+ upload des photos) sur la
+// branche main → build Netlify → site à jour en ~1 minute.
+// La calibration 3D des points (positions, angles) est préservée : ce
+// panneau ne touche qu'aux textes, médias, scènes et panoramas.
 // ============================================================
 
 (function () {
+  // ---- Configuration du dépôt / site ---------------------------------------
+  const REPO = 'jeanmichelnizet/icoeurvisit';
+  const BRANCH = 'main';
+  const NETLIFY_SITE = 'initiatives-coeur-visite.netlify.app';
+  const TOKEN_KEY = 'ic:gh-token';
+
   const clone = (x) => JSON.parse(JSON.stringify(x || null));
   const model = {
     hotspots: clone(window.HOTSPOTS) || [],
@@ -22,9 +24,9 @@
     scenes: clone(window.SCENES) || []
   };
 
-  const supportsFS = 'showDirectoryPicker' in window;
-  let dirHandle = null;
-  // slot key ("h:0:image", "pano:2") -> { path, file } queued for writing
+  let token = null;
+  try { token = sessionStorage.getItem(TOKEN_KEY) || null; } catch (e) {}
+  // slot key ("h:0:image", "pano:2") -> { path, file } à téléverser
   const pending = new Map();
 
   const $ = (s) => document.querySelector(s);
@@ -37,9 +39,9 @@
   const toastEl = $('#toast');
 
   const MEDIA = {
-    image:    { label: 'Photo',      folder: 'assets/photos' },
-    video:    { label: 'Vidéo',      folder: 'assets/videos' },
-    photo360: { label: 'Vue 360°',   folder: 'assets/panoramas' }
+    image:    { label: 'Photo',    folder: 'assets/photos' },
+    video:    { label: 'Vidéo',    folder: 'assets/videos' },
+    photo360: { label: 'Vue 360°', folder: 'assets/panoramas' }
   };
 
   // ---- helpers -------------------------------------------------------------
@@ -50,7 +52,6 @@
   const slug = (s) => (s || '').toString().toLowerCase()
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'fichier';
-
   const esc = (s) => (s == null ? '' : String(s))
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -59,102 +60,119 @@
     toastEl.textContent = msg;
     toastEl.className = 'toast show ' + (kind || '');
     if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { toastEl.className = 'toast'; }, 4200);
+    toastTimer = setTimeout(() => { toastEl.className = 'toast'; }, 5000);
   }
 
   function setStatus(state) {
     if (state === 'connected') {
-      statusEl.textContent = 'Dossier connecté ✓';
+      statusEl.textContent = 'Connecté à GitHub ✓';
       statusEl.className = 'status ok';
-      connectBtn.textContent = 'Changer de dossier';
-    } else if (state === 'warn') {
-      statusEl.textContent = 'Dossier connecté — mais index.html introuvable : es-tu sûr du bon dossier ?';
-      statusEl.className = 'status warn';
+      connectBtn.textContent = 'Se reconnecter';
     } else {
-      statusEl.textContent = supportsFS
-        ? 'Non connecté — clique « Connecter le dossier »'
-        : 'Navigateur non compatible : ouvre cette page dans Chrome ou Edge (les fichiers médias ne pourront pas être enregistrés ici).';
-      statusEl.className = 'status ' + (supportsFS ? '' : 'warn');
+      statusEl.textContent = 'Non connecté — clique « Se connecter à GitHub »';
+      statusEl.className = 'status';
+      connectBtn.textContent = 'Se connecter à GitHub';
     }
   }
 
-  // ---- File System Access --------------------------------------------------
-  async function getDir(root, parts) {
-    let h = root;
-    for (const p of parts) h = await h.getDirectoryHandle(p, { create: true });
-    return h;
+  // ---- Auth : OAuth GitHub via Netlify (popup) -----------------------------
+  function login() {
+    const url = 'https://api.netlify.com/auth?provider=github&site_id=' +
+      encodeURIComponent(NETLIFY_SITE) + '&scope=repo';
+    const popup = window.open(url, 'ic-gh-auth', 'width=620,height=720');
+    function onMsg(e) {
+      if (typeof e.data !== 'string') return;
+      // Poignée de main du protocole netlify-auth
+      if (e.data === 'authorizing:github') {
+        try { e.source.postMessage(e.data, e.origin); } catch (x) {}
+        return;
+      }
+      const m = e.data.match(/^authorization:github:(success|error):([\s\S]+)$/);
+      if (!m) return;
+      window.removeEventListener('message', onMsg);
+      try { popup && popup.close(); } catch (x) {}
+      if (m[1] === 'success') {
+        try {
+          const d = JSON.parse(m[2]);
+          token = d.token;
+          try { sessionStorage.setItem(TOKEN_KEY, token); } catch (x) {}
+          setStatus('connected');
+          toast('Connecté à GitHub ✓', 'ok');
+        } catch (x) { toast('Réponse de connexion illisible.', 'err'); }
+      } else {
+        toast('Connexion refusée : ' + m[2], 'err');
+      }
+    }
+    window.addEventListener('message', onMsg);
   }
-  async function writeFile(pathStr, data) {
-    const parts = pathStr.split('/');
-    const name = parts.pop();
-    const dir = await getDir(dirHandle, parts);
-    const fh = await dir.getFileHandle(name, { create: true });
-    const w = await fh.createWritable();
-    await w.write(data);
-    await w.close();
-  }
+  connectBtn.addEventListener('click', login);
 
-  connectBtn.addEventListener('click', async () => {
-    if (!supportsFS) { toast('Ouvre cette page dans Chrome ou Edge pour connecter le dossier.', 'err'); return; }
-    try {
-      dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-      const perm = await dirHandle.requestPermission({ mode: 'readwrite' });
-      if (perm !== 'granted') { dirHandle = null; toast('Permission refusée.', 'err'); return; }
-      let ok = true;
-      try { await dirHandle.getFileHandle('index.html'); } catch (e) { ok = false; }
-      setStatus(ok ? 'connected' : 'warn');
-      toast('Dossier connecté.', 'ok');
-    } catch (e) { /* user cancelled the picker */ }
+  // ---- GitHub API ----------------------------------------------------------
+  async function gh(path, opts) {
+    opts = opts || {};
+    const r = await fetch('https://api.github.com/' + path, Object.assign({}, opts, {
+      headers: Object.assign({
+        'Authorization': 'token ' + token,
+        'Accept': 'application/vnd.github+json'
+      }, opts.headers || {})
+    }));
+    return r;
+  }
+  async function getSha(path) {
+    const r = await gh('repos/' + REPO + '/contents/' + encodeURI(path) + '?ref=' + BRANCH);
+    if (r.status === 200) { const j = await r.json(); return j.sha; }
+    return null;
+  }
+  async function putFile(path, base64, message) {
+    const sha = await getSha(path);
+    const body = { message: message, content: base64, branch: BRANCH };
+    if (sha) body.sha = sha;
+    const r = await gh('repos/' + REPO + '/contents/' + encodeURI(path), {
+      method: 'PUT', body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error('écriture ' + path + ' → HTTP ' + r.status);
+    return r.json();
+  }
+  const b64text = (str) => btoa(unescape(encodeURIComponent(str)));
+  const fileToB64 = (file) => new Promise((res, rej) => {
+    const rd = new FileReader();
+    rd.onload = () => res(String(rd.result).split(',')[1]);
+    rd.onerror = rej;
+    rd.readAsDataURL(file);
   });
 
-  // ---- content.js serialisation -------------------------------------------
-  function serializeContent() {
-    const h = JSON.stringify(model.hotspots, null, 2);
-    const p = JSON.stringify(model.panoramas, null, 2);
-    const s = JSON.stringify(model.scenes, null, 2);
-    return (
-      '// Généré par admin.html — modifie le contenu via l\'interface d\'administration.\n' +
-      '// (Édition manuelle possible, mais l\'admin réécrit ce fichier à chaque enregistrement.)\n\n' +
-      'const HOTSPOTS = ' + h + ';\n\n' +
-      'const PANORAMAS = ' + p + ';\n\n' +
-      'const SCENES = ' + s + ';\n\n' +
-      'if (typeof window !== \'undefined\') {\n' +
-      '  window.HOTSPOTS = HOTSPOTS;\n' +
-      '  window.PANORAMAS = PANORAMAS;\n' +
-      '  window.SCENES = SCENES;\n' +
-      '}\n' +
-      'if (typeof module !== \'undefined\') module.exports = { HOTSPOTS, PANORAMAS, SCENES };\n'
-    );
-  }
-
-  function downloadText(filename, text) {
-    const blob = new Blob([text], { type: 'text/javascript' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  }
-
   saveBtn.addEventListener('click', async () => {
-    const content = serializeContent();
-    if (dirHandle) {
-      saveBtn.disabled = true;
-      try {
-        for (const [, item] of pending) await writeFile(item.path, item.file);
-        await writeFile('assets/js/content.js', content);
-        pending.clear();
-        toast('Enregistré ✓ — recharge la visite pour vérifier, puis redéploie le dossier.', 'ok');
-      } catch (e) {
-        toast('Erreur d\'écriture : ' + (e && e.message ? e.message : e), 'err');
-      } finally {
-        saveBtn.disabled = false;
+    if (!token) { toast('Connecte-toi à GitHub d’abord.', 'warn'); return; }
+    saveBtn.disabled = true;
+    const prev = saveBtn.textContent;
+    saveBtn.textContent = 'Enregistrement…';
+    try {
+      // 1. téléverser les médias en attente
+      for (const [, item] of pending) {
+        const b = await fileToB64(item.file);
+        await putFile(item.path, b, 'Média : ' + item.path);
       }
-    } else {
-      downloadText('content.js', content);
-      toast(pending.size
-        ? 'content.js téléchargé. Connecte le dossier pour enregistrer aussi les fichiers médias.'
-        : 'content.js téléchargé — place-le dans assets/js/ du projet.', 'warn');
+      // 2. committer content.json (source éditable)
+      const json = JSON.stringify({
+        hotspots: model.hotspots,
+        panoramas: model.panoramas,
+        scenes: model.scenes
+      }, null, 2) + '\n';
+      await putFile('content.json', b64text(json), 'Mise à jour du contenu via l’admin');
+      pending.clear();
+      toast('Enregistré ✓ — publication en cours, en ligne dans ~1 minute.', 'ok');
+    } catch (e) {
+      const msg = (e && e.message) || String(e);
+      if (/HTTP 40[13]/.test(msg)) {
+        toast('Session GitHub expirée — reconnecte-toi puis réessaie.', 'err');
+        token = null; try { sessionStorage.removeItem(TOKEN_KEY); } catch (x) {}
+        setStatus('idle');
+      } else {
+        toast('Erreur : ' + msg, 'err');
+      }
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = prev;
     }
   });
 
@@ -172,8 +190,7 @@
           '<label class="filebtn">Choisir un fichier' +
             '<input type="file" data-file="' + hIndex + ':' + kind + '" ' +
             (kind === 'video' ? 'accept="video/*"' : kind === 'image' ? 'accept="image/*"' : 'accept="image/*,video/*"') +
-            (supportsFS ? '' : ' disabled') + ' />' +
-          '</label>' +
+            ' /></label>' +
           '<span class="or">ou</span>' +
           '<input type="url" class="urlin" placeholder="https://… (lien externe)" ' +
             'data-url="' + hIndex + ':' + kind + '" value="' + (/^https?:/i.test(cur) ? esc(cur) : '') + '" />' +
@@ -223,7 +240,6 @@
     hotspotsEl.innerHTML = model.hotspots.map(hotspotCard).join('');
   }
 
-  // Text edits (event delegation)
   hotspotsEl.addEventListener('input', (e) => {
     const el = e.target;
     if (el.dataset.h != null && el.dataset.field) {
@@ -231,7 +247,7 @@
       if (el.dataset.lang === 'en') { (h.en || (h.en = {}))[el.dataset.field] = el.value; }
       else {
         h[el.dataset.field] = el.value;
-        if (el.dataset.field === 'title') { // keep the card header in sync
+        if (el.dataset.field === 'title') {
           const sum = el.closest('.card').querySelector('.ctitle');
           if (sum) sum.textContent = el.value;
         }
@@ -242,7 +258,6 @@
     }
   });
 
-  // File choose + clear (change/click delegation)
   hotspotsEl.addEventListener('change', (e) => {
     const el = e.target;
     if (!el.dataset.file) return;
@@ -267,7 +282,6 @@
     h.media = h.media || { video: null, photo360: null, image: null };
     h.media[kind] = value;
     if (!keepPending && value == null) pending.delete(hi + ':' + kind);
-    // if a URL was typed, drop any queued file for this slot
     if (value && /^https?:/i.test(value)) pending.delete(hi + ':' + kind);
     renderHotspots();
   }
@@ -284,7 +298,7 @@
           '<div class="media-row"><div class="media-head"><span class="mlabel">Image / vidéo 360°</span>' +
             '<span class="mcur">' + (src ? esc(src) : '<em>aucun</em>') + '</span></div>' +
             '<div class="media-inputs">' +
-              '<label class="filebtn">Choisir un fichier<input type="file" accept="image/*,video/*" data-panofile="' + i + '"' + (supportsFS ? '' : ' disabled') + ' /></label>' +
+              '<label class="filebtn">Choisir un fichier<input type="file" accept="image/*,video/*" data-panofile="' + i + '" /></label>' +
               '<span class="or">ou</span>' +
               '<input type="url" class="urlin" placeholder="https://…" data-pano="' + i + '" data-pfield="src" value="' + (/^https?:/i.test(src) ? esc(src) : '') + '" />' +
               '<button class="link danger" data-panodel="' + i + '">supprimer</button>' +
@@ -356,7 +370,7 @@
   });
 
   // ---- boot ----------------------------------------------------------------
-  setStatus('idle');
+  setStatus(token ? 'connected' : 'idle');
   renderHotspots();
   renderPanoramas();
   renderScenes();
