@@ -135,7 +135,9 @@
   // ---- GitHub API : commit atomique (Git Data API) -------------------------
   async function gh(path, opts) {
     opts = opts || {};
-    return fetch('https://api.github.com/' + path, Object.assign({}, opts, {
+    // 'no-store' : GitHub marque certaines réponses GET « cache 60s » ; sans ça,
+    // le navigateur relit une position de branche périmée → conflit 422 au commit.
+    return fetch('https://api.github.com/' + path, Object.assign({ cache: 'no-store' }, opts, {
       headers: Object.assign({ 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json' }, opts.headers || {})
     }));
   }
