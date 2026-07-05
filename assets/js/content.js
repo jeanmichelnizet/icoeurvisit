@@ -1,8 +1,5 @@
-// Généré automatiquement à partir de content.json — NE PAS ÉDITER À LA MAIN.
-// (Éditez content.json via l'éditeur en ligne ou l'admin, puis régénérez.)
+// Généré par l'admin — NE PAS ÉDITER À LA MAIN.
 
-// Mode aperçu : sur une URL '?preview', on utilise le contenu déposé par l'admin
-// dans localStorage (modifs non encore publiées) au lieu du contenu publié.
 var _pv = (function () {
   try {
     if (typeof location !== 'undefined' && /[?&]preview\b/.test(location.search)) {
@@ -17,7 +14,7 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
     "media": {
       "video": null,
       "photo360": null,
-      "image": "assets/images/bateau-en-mer.webp"
+      "image": "assets/photos/mat.png"
     },
     "num": 1,
     "snapToSurface": false,
@@ -311,7 +308,7 @@ if (typeof window !== 'undefined') {
     window.addEventListener('DOMContentLoaded', function () {
       var b = document.createElement('div');
       b.textContent = 'Aperçu des modifications — non publié';
-      b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483646;background:#9a6410;color:#fff;font:600 12px/1.2 -apple-system,BlinkMacSystemFont,Arial,sans-serif;text-align:center;padding:9px;letter-spacing:.04em';
+      b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483646;background:#9a6410;color:#fff;font:600 12px/1.2 -apple-system,Arial,sans-serif;text-align:center;padding:9px';
       document.body.appendChild(b);
     });
   }
