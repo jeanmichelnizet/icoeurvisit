@@ -17,7 +17,7 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
       "image": "assets/photos/mat-matage-imoca-initiatives-c-ur-quatrieme-du-nom-09.jpg",
       "images": [
         "assets/photos/mat-matage-imoca-initiatives-c-ur-quatrieme-du-nom-09.jpg",
-        "assets/photos/mat-initiatives-coeur-banque-image-course-des-caps-54.jpeg"
+        "assets/photos/mat-constance-court-metrage-cartographique-42-km-du-mont-blanc.png"
       ]
     },
     "num": 1,
