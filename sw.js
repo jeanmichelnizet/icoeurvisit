@@ -11,7 +11,7 @@
 // Bump CACHE to invalidate everything on the next visit.
 // ============================================================
 
-const CACHE = 'ic-cache-v3';
+const CACHE = 'ic-cache-v4';
 
 // Precache the app shell so the very first offline load works. The heavy
 // media (GLB, audio) is cached on demand instead, to keep install light.
