@@ -14,7 +14,8 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
     "media": {
       "video": null,
       "photo360": null,
-      "image": "assets/photos/mat.jpeg"
+      "image": null,
+      "images": []
     },
     "num": 1,
     "snapToSurface": false,
@@ -48,7 +49,10 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
     "media": {
       "video": null,
       "photo360": null,
-      "image": "assets/photos/foil-babord.png"
+      "image": "assets/photos/foil-babord.png",
+      "images": [
+        "assets/photos/foil-babord.png"
+      ]
     },
     "num": 2,
     "snapToSurface": false,
@@ -82,7 +86,8 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
     "media": {
       "video": null,
       "photo360": null,
-      "image": null
+      "image": null,
+      "images": []
     },
     "num": 3,
     "snapToSurface": false,
@@ -116,7 +121,8 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
     "media": {
       "video": null,
       "photo360": null,
-      "image": null
+      "image": null,
+      "images": []
     },
     "num": 4,
     "snapToSurface": false,
@@ -150,7 +156,8 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
     "media": {
       "video": null,
       "photo360": null,
-      "image": null
+      "image": null,
+      "images": []
     },
     "num": 5,
     "snapToSurface": false,
@@ -184,7 +191,8 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
     "media": {
       "video": null,
       "photo360": null,
-      "image": null
+      "image": null,
+      "images": []
     },
     "num": 6,
     "snapToSurface": false,
@@ -218,7 +226,8 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
     "media": {
       "video": null,
       "photo360": null,
-      "image": null
+      "image": null,
+      "images": []
     },
     "num": 7,
     "snapToSurface": false,
@@ -252,7 +261,8 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
     "media": {
       "video": null,
       "photo360": null,
-      "image": null
+      "image": null,
+      "images": []
     },
     "num": 8,
     "snapToSurface": false,
