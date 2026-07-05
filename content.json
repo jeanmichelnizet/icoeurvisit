@@ -4,8 +4,10 @@
       "media": {
         "video": null,
         "photo360": null,
-        "image": null,
-        "images": []
+        "image": "assets/photos/mat-matage-imoca-initiatives-c-ur-quatrieme-du-nom-09.jpg",
+        "images": [
+          "assets/photos/mat-matage-imoca-initiatives-c-ur-quatrieme-du-nom-09.jpg"
+        ]
       },
       "num": 1,
       "snapToSurface": false,
