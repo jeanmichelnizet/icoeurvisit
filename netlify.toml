@@ -1,2 +1,5 @@
 [build]
   publish = "."
+  # Régénère assets/js/content.js depuis content.json à chaque publication.
+  # Tolérant : en cas d'échec, le content.js déjà présent est conservé.
+  command = "python3 scripts/build-content.py || true"

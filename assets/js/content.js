@@ -1,5 +1,5 @@
-// Généré par admin.html — modifie le contenu via l'interface d'administration.
-// (Édition manuelle possible, mais l'admin réécrit ce fichier à chaque enregistrement.)
+// Généré automatiquement à partir de content.json — NE PAS ÉDITER À LA MAIN.
+// (Éditez content.json via l'éditeur en ligne ou l'admin, puis régénérez.)
 
 const HOTSPOTS = [
   {
