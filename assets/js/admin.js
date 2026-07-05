@@ -17,7 +17,7 @@
   };
 
   let token = null;
-  try { token = sessionStorage.getItem(TOKEN_KEY) || null; } catch (e) {}
+  try { token = localStorage.getItem(TOKEN_KEY) || null; } catch (e) {}
   const pending = new Map();       // slot -> { path, file } (médias à téléverser)
   const previewURLs = {};          // slot -> objectURL (vignettes locales)
 
@@ -82,15 +82,11 @@
   }
   function clearAllPreviews() { Object.keys(previewURLs).forEach(clearPreview); }
 
-  // Chemin d'affichage : un chemin relatif ('assets/…') est rendu absolu ('/assets/…')
-  // pour s'afficher correctement quelle que soit l'URL de la page admin.
-  const mediaUrl = (v) => (v && !/^https?:/i.test(v) && v.charAt(0) !== '/' && v.indexOf('blob:') !== 0) ? '/' + v : v;
-
   function mediaThumb(slot, value) {
     const pend = pending.get(slot);
     if (!pend && !value) return '';
     const file = pend && pend.file;
-    const src = pend ? previewURLs[slot] : mediaUrl(value);
+    const src = pend ? previewURLs[slot] : value;
     const name = pend ? pend.file.name : value;
     const inner = isImg(value, file)
       ? '<img src="' + esc(src) + '" alt="" onerror="this.style.display=\'none\'" />'
@@ -100,28 +96,31 @@
       '<button class="thumb-x" title="Retirer" data-clear="' + slot + '">×</button></div>';
   }
 
-  // ---- Auth : OAuth GitHub via Netlify (popup) -----------------------------
+  // ---- Auth : jeton GitHub (collé une fois, gardé dans ce navigateur) -------
   function login() {
-    const url = 'https://api.netlify.com/auth?provider=github&site_id=' +
-      encodeURIComponent(NETLIFY_SITE) + '&scope=repo';
-    const popup = window.open(url, 'ic-gh-auth', 'width=620,height=720');
-    function onMsg(e) {
-      if (typeof e.data !== 'string') return;
-      if (e.data === 'authorizing:github') { try { e.source.postMessage(e.data, e.origin); } catch (x) {} return; }
-      const m = e.data.match(/^authorization:github:(success|error):([\s\S]+)$/);
-      if (!m) return;
-      window.removeEventListener('message', onMsg);
-      try { popup && popup.close(); } catch (x) {}
-      if (m[1] === 'success') {
-        try {
-          token = JSON.parse(m[2]).token;
-          try { sessionStorage.setItem(TOKEN_KEY, token); } catch (x) {}
-          setStatus('connected');
-          toast('Connecté à GitHub ✓', 'ok');
-        } catch (x) { toast('Réponse de connexion illisible.', 'err'); }
-      } else { toast('Connexion refusée : ' + m[2], 'err'); }
+    const t = window.prompt(
+      'Colle ton jeton d’accès GitHub (commence par ghp_… ou github_pat_…).\n\n' +
+      'Il reste enregistré dans CE navigateur uniquement, jamais publié.\n' +
+      'Pour en créer un : github.com/settings/tokens → « Generate new token (classic) » → coche « repo ».',
+      token || '');
+    if (t == null) return;
+    const clean = t.trim();
+    if (!clean) {
+      token = null; try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+      setStatus('idle'); return;
     }
-    window.addEventListener('message', onMsg);
+    token = clean;
+    gh('user').then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then((u) => {
+        try { localStorage.setItem(TOKEN_KEY, token); } catch (e) {}
+        setStatus('connected');
+        toast('Connecté à GitHub' + (u && u.login ? ' (' + u.login + ')' : '') + ' ✓', 'ok');
+      })
+      .catch(() => {
+        token = null; try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+        setStatus('idle');
+        toast('Jeton invalide ou sans accès « repo ». Réessaie.', 'err');
+      });
   }
   connectBtn.addEventListener('click', login);
 
@@ -182,6 +181,37 @@
       { method: 'PATCH', body: JSON.stringify({ sha: commit.sha }) }, 'mise à jour de la branche');
   }
 
+  // Génère assets/js/content.js (l'app le lit tel quel — pas de build serveur nécessaire).
+  function buildContentJs() {
+    const d = (x) => JSON.stringify(x, null, 2);
+    return (
+      "// Généré par l'admin — NE PAS ÉDITER À LA MAIN.\n\n" +
+      "var _pv = (function () {\n" +
+      "  try {\n" +
+      "    if (typeof location !== 'undefined' && /[?&]preview\\b/.test(location.search)) {\n" +
+      "      return JSON.parse(localStorage.getItem('ic:preview') || 'null');\n" +
+      "    }\n" +
+      "  } catch (e) {}\n" +
+      "  return null;\n" +
+      "})();\n\n" +
+      "const HOTSPOTS = (_pv && _pv.hotspots) || " + d(model.hotspots) + ";\n\n" +
+      "const PANORAMAS = (_pv && _pv.panoramas) || " + d(model.panoramas) + ";\n\n" +
+      "const SCENES = (_pv && _pv.scenes) || " + d(model.scenes) + ";\n\n" +
+      "if (typeof window !== 'undefined') {\n" +
+      "  window.HOTSPOTS = HOTSPOTS;\n  window.PANORAMAS = PANORAMAS;\n  window.SCENES = SCENES;\n" +
+      "  if (_pv) {\n" +
+      "    window.addEventListener('DOMContentLoaded', function () {\n" +
+      "      var b = document.createElement('div');\n" +
+      "      b.textContent = 'Aperçu des modifications — non publié';\n" +
+      "      b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483646;background:#9a6410;color:#fff;font:600 12px/1.2 -apple-system,Arial,sans-serif;text-align:center;padding:9px';\n" +
+      "      document.body.appendChild(b);\n" +
+      "    });\n" +
+      "  }\n" +
+      "}\n" +
+      "if (typeof module !== 'undefined') module.exports = { HOTSPOTS, PANORAMAS, SCENES };\n"
+    );
+  }
+
   async function save() {
     if (!token) { toast('Connecte-toi à GitHub d’abord.', 'warn'); return; }
     saveBtn.disabled = true;
@@ -198,6 +228,7 @@
       saveBtn.textContent = 'Publication…';
       const json = JSON.stringify({ hotspots: model.hotspots, panoramas: model.panoramas, scenes: model.scenes }, null, 2) + '\n';
       files.push({ path: 'content.json', base64: b64text(json) });
+      files.push({ path: 'assets/js/content.js', base64: b64text(buildContentJs()) });
       progSet(0.7);
       // GitHub peut renvoyer une position de branche périmée (réplication) →
       // conflit 409/422. On réessaie en relisant la branche à chaque fois.
@@ -221,7 +252,7 @@
     } catch (e) {
       const msg = (e && e.message) || String(e);
       if (/HTTP 40[13]/.test(msg)) {
-        token = null; try { sessionStorage.removeItem(TOKEN_KEY); } catch (x) {}
+        token = null; try { localStorage.removeItem(TOKEN_KEY); } catch (x) {}
         setStatus('idle');
         toast('Session GitHub expirée — reconnecte-toi puis réessaie.', 'err');
       } else { toast('Erreur : ' + msg, 'err'); }
