@@ -116,6 +116,11 @@
   .thumb-x{position:absolute;top:-9px;right:-9px;width:22px;height:22px;padding:0;border:2px solid #fff;border-radius:50%;background:var(--danger);color:#fff;font-size:14px;line-height:1;cursor:pointer;box-shadow:0 1px 5px rgba(0,0,0,.35)}
   .thumb-x:hover{background:#a00d18}
 
+  #pub-banner{position:fixed;left:0;right:0;bottom:0;z-index:2147483645;text-align:center;padding:12px;font-weight:600;font-size:13px;color:#fff;transform:translateY(110%);transition:transform .35s ease,background .4s ease;letter-spacing:.02em}
+  #pub-banner.show{transform:translateY(0)}
+  #pub-banner.pub{background:#9a6410}
+  #pub-banner.ok{background:#16a34a}
+
   @media (max-width:680px){ .cols{grid-template-columns:1fr;gap:8px} }
 </style>
 <script src="assets/js/content.js" defer></script>
@@ -162,6 +167,7 @@
   <div id="scenes"></div>
 </main>
 
+<div id="pub-banner" role="status" aria-live="polite"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

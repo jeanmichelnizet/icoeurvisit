@@ -40,6 +40,7 @@
   const toastEl = $('#toast');
   const progEl = $('#admin-progress');
   const progFill = progEl ? progEl.querySelector('span') : null;
+  const bannerEl = $('#pub-banner');
 
   const MEDIA = {
     image:    { label: 'Photo',    folder: 'assets/photos',    accept: 'image/*' },
@@ -81,6 +82,22 @@
   function progOn() { if (progEl) progEl.classList.add('on'); }
   function progSet(pct) { if (progFill) progFill.style.width = Math.round(Math.max(0, Math.min(1, pct)) * 100) + '%'; }
   function progOff() { if (progEl) setTimeout(() => { progEl.classList.remove('on'); progSet(0); }, 500); }
+
+  // Bandeau de publication : orange « en cours » → vert « à jour » → disparaît.
+  let bannerTimer = null;
+  function showBanner(kind, text) { if (bannerEl) { bannerEl.textContent = text; bannerEl.className = 'show ' + kind; } }
+  function hideBanner() { if (bannerEl) bannerEl.className = ''; }
+  async function pollLive(target, maxMs) {
+    const start = Date.now();
+    while (Date.now() - start < (maxMs || 150000)) {
+      try {
+        const r = await fetch('content.json?t=' + Date.now(), { cache: 'no-store' });
+        if (r.ok) { const t = await r.text(); if (t.trim() === target.trim()) return true; }
+      } catch (e) {}
+      await new Promise((res) => setTimeout(res, 4000));
+    }
+    return false;
+  }
 
   function setPreview(slot, file) { if (previewURLs[slot]) URL.revokeObjectURL(previewURLs[slot]); previewURLs[slot] = URL.createObjectURL(file); }
   function clearPreview(slot) { if (previewURLs[slot]) { URL.revokeObjectURL(previewURLs[slot]); delete previewURLs[slot]; } }
@@ -208,8 +225,15 @@
       pending.clear(); clearAllPreviews();
       published.length = 0; clone(model.hotspots).forEach((h) => published.push(h));
       publishedPanos.length = 0; clone(model.panoramas).forEach((p) => publishedPanos.push(p));
-      toast('Enregistré ✓ — en ligne dans ~1 minute.', 'ok');
+      toast('Enregistré ✓', 'ok');
       renderAll();
+      // Bandeau : publication en cours (orange) → site à jour (vert) → disparaît après 5 s.
+      if (bannerTimer) clearTimeout(bannerTimer);
+      showBanner('pub', 'Publication en cours…');
+      pollLive(json).then((live) => {
+        showBanner('ok', live ? 'Site à jour ✓' : 'Publié — visible d’ici ~1 min ✓');
+        bannerTimer = setTimeout(hideBanner, 5000);
+      });
     } catch (e) {
       const msg = (e && e.message) || String(e);
       if (/HTTP 40[13]/.test(msg)) { token = null; try { localStorage.removeItem(TOKEN_KEY); } catch (x) {} setStatus('idle'); toast('Session GitHub expirée — reconnecte-toi puis réessaie.', 'err'); }
