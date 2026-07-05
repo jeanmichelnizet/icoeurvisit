@@ -4,9 +4,9 @@
 
 | | |
 |---|---|
-| **Site public** | https://initiatives-coeur-visite.netlify.app |
+| **Site public** | https://jeanmichelnizet.github.io/icoeurvisit/ |
 | **Mot de passe visiteur** | `Coeur-XllTfOQ` |
-| **Administration (éditeur)** | https://initiatives-coeur-visite.netlify.app/admin.html |
+| **Administration (éditeur)** | https://jeanmichelnizet.github.io/icoeurvisit/admin.html |
 | **Dépôt du code (GitHub)** | https://github.com/jeanmichelnizet/icoeurvisit |
 
 Le **mot de passe visiteur** protège l'accès au site (à donner aux personnes qui doivent le voir, ex. Ulysse). Il ne rend rien public : le site reste privé et non référencé sur Google.
