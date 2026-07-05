@@ -141,7 +141,11 @@
   }
   async function ghJSON(path, opts, what) {
     const r = await gh(path, opts);
-    if (!r.ok) throw new Error((what || path) + ' → HTTP ' + r.status);
+    if (!r.ok) {
+      let detail = '';
+      try { const j = await r.json(); if (j && j.message) detail = ' (' + j.message + ')'; } catch (e) {}
+      throw new Error((what || path) + ' → HTTP ' + r.status + detail);
+    }
     return r.json();
   }
   const b64text = (str) => btoa(unescape(encodeURIComponent(str)));
@@ -189,7 +193,21 @@
       const json = JSON.stringify({ hotspots: model.hotspots, panoramas: model.panoramas, scenes: model.scenes }, null, 2) + '\n';
       files.push({ path: 'content.json', base64: b64text(json) });
       progSet(0.7);
-      await commitAll(files, 'Mise à jour du contenu via l’admin', (i, n) => progSet(0.7 + (i / n) * 0.28));
+      // GitHub peut renvoyer une position de branche périmée (réplication) →
+      // conflit 409/422. On réessaie en relisant la branche à chaque fois.
+      let ok = false, tries = 0;
+      while (!ok) {
+        tries++;
+        try {
+          await commitAll(files, 'Mise à jour du contenu via l’admin', (i, n) => progSet(0.7 + (i / n) * 0.28));
+          ok = true;
+        } catch (err) {
+          if (/HTTP 4(09|22)/.test(err.message || '') && tries < 5) {
+            saveBtn.textContent = 'Nouvel essai ' + tries + '…';
+            await new Promise((r) => setTimeout(r, 800 * tries));
+          } else { throw err; }
+        }
+      }
       progSet(1);
       pending.clear(); clearAllPreviews();
       toast('Enregistré ✓ — en ligne dans ~1 minute.', 'ok');

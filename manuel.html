@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="robots" content="noindex,nofollow" />
+<script src="assets/js/gate.js"></script>
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
+<title>Manuel · Initiatives-Cœur</title>
+<style>
+  :root{
+    --paper:#eef1f5;--card:#fff;--ink:#0c1c34;--muted:#5b6b82;--line:#dbe1ea;
+    --accent:#e30613;--accent-2:#a6050f;--navy:#071429;--ok:#0e7457;
+    --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6;font-size:16px}
+  header{background:var(--navy);color:#eef2f8;padding:26px 22px;border-bottom:3px solid var(--accent)}
+  header .in{max-width:820px;margin:0 auto;display:flex;align-items:center;gap:12px}
+  header svg{width:30px;height:30px}
+  header h1{font:600 22px/1.1 Georgia,serif;margin:0}
+  header small{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9fb0c8;margin-top:3px}
+  main{max-width:820px;margin:0 auto;padding:8px 22px 80px}
+  h2{font:600 20px/1.2 Georgia,serif;margin:34px 0 10px;padding-top:18px;border-top:1px solid var(--line)}
+  h2:first-of-type{border-top:0}
+  h3{font-size:15px;margin:20px 0 6px}
+  p,li{color:#26364e}
+  a{color:var(--accent-2)}
+  code{font-family:var(--mono);font-size:.88em;background:#e7ecf3;padding:1px 6px;border-radius:5px}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:14.5px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .box{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:14px 18px;margin:14px 0}
+  .key{background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px 16px;margin:14px 0}
+  .key td:first-child{font-weight:600;white-space:nowrap}
+  .key a{word-break:break-all}
+  .pwd{font-family:var(--mono);background:#fdeaec;color:var(--accent-2);padding:2px 8px;border-radius:5px;font-weight:600}
+  .back{display:inline-block;margin:18px 0 0;font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.1em}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M12 21s-7-4.5-7-11a7 7 0 0 1 14 0c0 6.5-7 11-7 11z" fill="#E30613"/>
+    <path d="M12 14l-2-2a1.5 1.5 0 0 1 2-2.2A1.5 1.5 0 0 1 14 12l-2 2z" fill="#fff"/>
+  </svg>
+  <div><h1>Manuel d'utilisation</h1><small>Visite virtuelle Initiatives-Cœur</small></div>
+</div></header>
+
+<main>
+  <h2>1. Adresses & mots de passe</h2>
+  <table class="key">
+    <tr><td>Site public</td><td><a href="https://initiatives-coeur-visite.netlify.app" target="_blank">initiatives-coeur-visite.netlify.app</a></td></tr>
+    <tr><td>Mot de passe visiteur</td><td><span class="pwd">Coeur-XllTfOQ</span></td></tr>
+    <tr><td>Administration</td><td><a href="admin.html">/admin.html</a></td></tr>
+    <tr><td>Dépôt du code</td><td><a href="https://github.com/jeanmichelnizet/icoeurvisit" target="_blank">github.com/jeanmichelnizet/icoeurvisit</a></td></tr>
+  </table>
+  <p>Le <b>mot de passe visiteur</b> protège l'accès au site (à donner aux personnes qui doivent le voir). Il ne rend rien public : le site reste privé et non référencé sur Google.</p>
+
+  <h2>2. Les deux niveaux d'accès</h2>
+  <ul>
+    <li><b>Mot de passe visiteur</b> (<span class="pwd">Coeur-XllTfOQ</span>) : pour <i>voir</i> le site et <i>ouvrir</i> l'admin.</li>
+    <li><b>Connexion GitHub</b> (compte <code>jeanmichelnizet</code>) : nécessaire uniquement pour <b>enregistrer</b> des modifications.</li>
+  </ul>
+
+  <h2>3. Modifier le contenu — pas à pas</h2>
+  <ol>
+    <li>Ouvre l'<a href="admin.html">administration</a> et saisis le mot de passe visiteur.</li>
+    <li>Clique <b>« Se connecter à GitHub »</b> → autorise (une fois par session).</li>
+    <li>Modifie ce que tu veux (voir §4). Le bouton vert <b>« Aperçu du site »</b> ouvre un onglet avec tes modifs <b>non publiées</b>.</li>
+    <li>Clique <b>« Enregistrer »</b>.</li>
+    <li>✅ Le site se met à jour <b>tout seul en ~1 minute</b>. Recharge pour vérifier.</li>
+  </ol>
+  <div class="box">Fonctionne depuis <b>n'importe quel navigateur</b> (ordi, mobile). Aucun logiciel à installer.</div>
+
+  <h2>4. Ce que tu peux modifier</h2>
+  <h3>Les 8 points de la visite 3D</h3>
+  <ul>
+    <li><b>Titre</b>, <b>sur-titre</b>, <b>description</b> — en <b>français</b> et en <b>anglais</b>.</li>
+    <li><b>Médias</b> : une <b>Photo</b>, une <b>Vidéo</b>, une <b>Vue 360°</b> par point.</li>
+    <li>🔒 La <b>position 3D</b> des points n'est pas modifiable ici : elle est verrouillée et préservée automatiquement.</li>
+  </ul>
+  <h3>Vues 3D intérieures (superspl.at)</h3>
+  <p>Ajouter / retirer des scènes 3D d'intérieur. Chacune ajoute un <b>bouton</b> dans la visite. Renseigner l'<b>id</b> (ex. <code>a90175ab</code>) ou le <b>lien</b> de la scène.</p>
+  <h3>Panoramas 360° (bouton « 360° »)</h3>
+  <p>Images ou vidéos <b>équirectangulaires</b> ouvertes en plein cadre.</p>
+
+  <h2>5. Types de fichiers & recommandations</h2>
+  <table>
+    <tr><th>Contenu</th><th>Formats</th><th>Recommandation</th></tr>
+    <tr><td>Photo (d'un point)</td><td>JPG, PNG, WEBP</td><td>Idéal <b>&lt; 1–2 Mo</b> (compresse avant). Téléversée directement.</td></tr>
+    <tr><td>Photo 360°</td><td>JPG équirectangulaire, ratio <b>2:1</b> (ex. 5760×2880)</td><td>Fichier <b>ou</b> lien.</td></tr>
+    <tr><td>Vidéo</td><td>MP4</td><td>⚠️ Vidéo <b>lourde</b> → mieux vaut l'héberger ailleurs (Vimeo/YouTube <b>non répertorié</b>) et coller le <b>lien</b>.</td></tr>
+    <tr><td>Vue 3D intérieure</td><td>—</td><td>Un <b>id / lien superspl.at</b>.</td></tr>
+    <tr><td>Logos sponsors</td><td>SVG / PNG (fond transparent)</td><td>Gérés séparément pour l'instant (pas dans l'admin).</td></tr>
+  </table>
+  <h3>Fichier téléversé ou lien externe ?</h3>
+  <p>Chaque média propose <b>« Choisir un fichier »</b> <i>ou</i> un champ <b>lien</b> : petite photo → téléverse ; gros média (vidéo) → colle un <b>lien</b>.</p>
+
+  <h2>6. Bon à savoir</h2>
+  <ul>
+    <li>Chaque <b>« Enregistrer »</b> crée une version dans GitHub : <b>tout est historisé</b> et récupérable.</li>
+    <li><b>Version anglaise (EN)</b> : les textes EN sont là ; l'<b>audio EN</b> n'est pas encore généré.</li>
+    <li><b>Ne partage pas</b> le mot de passe visiteur publiquement tant que le site n'est pas destiné à être ouvert à tous.</li>
+  </ul>
+
+  <h2>7. En cas de souci</h2>
+  <table>
+    <tr><th>Symptôme</th><th>Solution</th></tr>
+    <tr><td>« Session GitHub expirée »</td><td>Reclique <b>« Se connecter à GitHub »</b>, puis réessaie.</td></tr>
+    <tr><td>Une modif n'apparaît pas</td><td>Attends <b>1–2 min</b> (publication), puis recharge avec <b>Cmd + Shift + R</b>.</td></tr>
+    <tr><td>Besoin de revenir en arrière</td><td>Toutes les versions sont dans GitHub — demande-moi, je peux restaurer.</td></tr>
+  </table>
+
+  <a class="back" href="admin.html">← Retour à l'administration</a>
+</main>
+</body>
+</html>
