@@ -16,8 +16,7 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
       "photo360": null,
       "image": "assets/photos/mat-matage-imoca-initiatives-c-ur-quatrieme-du-nom-09.jpg",
       "images": [
-        "assets/photos/mat-matage-imoca-initiatives-c-ur-quatrieme-du-nom-09.jpg",
-        "assets/photos/mat-constance-court-metrage-cartographique-42-km-du-mont-blanc.png"
+        "assets/photos/mat-matage-imoca-initiatives-c-ur-quatrieme-du-nom-09.jpg"
       ]
     },
     "num": 1,
