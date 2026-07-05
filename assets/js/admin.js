@@ -107,6 +107,17 @@
   }
   connectBtn.addEventListener('click', login);
 
+  // ---- Aperçu : ouvre la visite avec les modifs EN COURS (non publiées) -----
+  const previewBtn = $('#preview-btn');
+  if (previewBtn) previewBtn.addEventListener('click', () => {
+    try {
+      localStorage.setItem('ic:preview', JSON.stringify({
+        hotspots: model.hotspots, panoramas: model.panoramas, scenes: model.scenes
+      }));
+    } catch (e) { toast('Aperçu indisponible (stockage du navigateur).', 'err'); return; }
+    window.open('visite.html?preview=1', '_blank');
+  });
+
   // ---- GitHub API ----------------------------------------------------------
   async function gh(path, opts) {
     opts = opts || {};

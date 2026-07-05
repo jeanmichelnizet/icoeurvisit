@@ -10,7 +10,7 @@
 
   var KEY = 'ic:gate';
   var HASH = '30b59239b9c553ecb8985bfa1c162b10fdd243c0a2228906d613d39d2a866278';
-  try { if (sessionStorage.getItem(KEY) === HASH) return; } catch (e) {}
+  try { if (localStorage.getItem(KEY) === HASH) return; } catch (e) {}
 
   var s = document.createElement('style');
   s.textContent = 'html.ic-locked{background:#040d24}html.ic-locked body{visibility:hidden}#ic-gate{visibility:visible}';
@@ -45,7 +45,7 @@
       ev.preventDefault();
       sha(p.value).then(function (hh) {
         if (hh === HASH) {
-          try { sessionStorage.setItem(KEY, HASH); } catch (er) {}
+          try { localStorage.setItem(KEY, HASH); } catch (er) {}
           document.documentElement.classList.remove('ic-locked');
           if (o.parentNode) o.parentNode.removeChild(o);
           window.dispatchEvent(new Event('resize'));
