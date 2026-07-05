@@ -758,7 +758,7 @@
     } else if (media === 'image') {
       const url = hs.media && hs.media.image;
       mediaContent.innerHTML = url
-        ? `<div class="media-photo"><img src="${url}" alt="${tr(hs, 'title')}" loading="lazy" /></div>`
+        ? `<div class="media-photo"><img src="${url}" alt="${tr(hs, 'title')}" /></div>`
         : imagePlaceholder();
     }
   }

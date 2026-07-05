@@ -11,7 +11,7 @@
 // Bump CACHE to invalidate everything on the next visit.
 // ============================================================
 
-const CACHE = 'ic-cache-v2';
+const CACHE = 'ic-cache-v3';
 
 // Precache the app shell so the very first offline load works. The heavy
 // media (GLB, audio) is cached on demand instead, to keep install light.
@@ -51,6 +51,10 @@ self.addEventListener('fetch', (event) => {
   // Ne JAMAIS intercepter/cacher les API externes (GitHub, Netlify) : l'admin
   // en a besoin toujours fraîches (sinon on sert une position de branche périmée → 422).
   if (url.hostname === 'api.github.com' || url.hostname === 'api.netlify.com') return;
+
+  // Médias éditables (photos/vidéos/panoramas) : toujours frais depuis le réseau,
+  // pour ne jamais rester bloqué sur une ancienne version cassée.
+  if (/\/assets\/(photos|videos|panoramas)\//.test(url.pathname)) return;
 
   const sameOrigin = url.origin === self.location.origin;
 
