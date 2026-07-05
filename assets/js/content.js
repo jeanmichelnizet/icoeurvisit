@@ -312,10 +312,18 @@ const SCENES = (_pv && _pv.scenes) || [
   }
 ];
 
+const VIDEOS360 = (_pv && _pv.videos360) || [
+  {
+    "src": "https://www.youtube.com/watch?v=GtpjJtcwbns",
+    "label": "Navigation en 360"
+  }
+];
+
 if (typeof window !== 'undefined') {
   window.HOTSPOTS = HOTSPOTS;
   window.PANORAMAS = PANORAMAS;
   window.SCENES = SCENES;
+  window.VIDEOS360 = VIDEOS360;
   if (_pv) {
     window.addEventListener('DOMContentLoaded', function () {
       var b = document.createElement('div');
@@ -325,4 +333,4 @@ if (typeof window !== 'undefined') {
     });
   }
 }
-if (typeof module !== 'undefined') module.exports = { HOTSPOTS, PANORAMAS, SCENES };
+if (typeof module !== 'undefined') module.exports = { HOTSPOTS, PANORAMAS, SCENES, VIDEOS360 };

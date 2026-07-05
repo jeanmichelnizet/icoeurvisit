@@ -298,5 +298,11 @@
       "src": "a90175ab",
       "label": "Vue intérieure (test)"
     }
+  ],
+  "videos360": [
+    {
+      "src": "https://www.youtube.com/watch?v=GtpjJtcwbns",
+      "label": "Navigation en 360"
+    }
   ]
 }
