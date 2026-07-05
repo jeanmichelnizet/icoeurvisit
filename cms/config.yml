@@ -1,0 +1,77 @@
+backend:
+  name: github
+  repo: jeanmichelnizet/icoeurvisit
+  branch: main
+
+# Les photos téléversées sont enregistrées ici (dans le dépôt).
+media_folder: "assets/photos"
+public_folder: "/assets/photos"
+
+locale: fr
+publish_mode: simple
+
+collections:
+  - name: contenu
+    label: "Contenu de la visite"
+    delete: false
+    files:
+      - name: visite
+        label: "Points, vues 3D & panoramas"
+        file: "content.json"
+        description: "Textes et médias de la visite. La position 3D des points est verrouillée et préservée automatiquement."
+        editor:
+          preview: false
+        fields:
+          - name: hotspots
+            label: "Points du bateau"
+            label_singular: "Point"
+            widget: list
+            summary: "{{fields.num}} · {{fields.title}}"
+            fields:
+              - { name: id, widget: hidden }
+              - { name: num, widget: hidden }
+              - { name: title, label: "Titre (FR)", widget: string }
+              - { name: eyebrow, label: "Sur-titre (FR)", widget: string }
+              - { name: text, label: "Description (FR)", widget: text }
+              - name: en
+                label: "Version anglaise"
+                widget: object
+                collapsed: true
+                required: false
+                fields:
+                  - { name: title, label: "Title (EN)", widget: string, required: false }
+                  - { name: eyebrow, label: "Eyebrow (EN)", widget: string, required: false }
+                  - { name: text, label: "Description (EN)", widget: text, required: false }
+              - name: media
+                label: "Médias"
+                widget: object
+                collapsed: true
+                required: false
+                fields:
+                  - { name: image, label: "Photo", widget: image, required: false, allow_multiple: false }
+                  - { name: video, label: "Vidéo (lien ou chemin)", widget: string, required: false }
+                  - { name: photo360, label: "Vue 360° (lien ou chemin)", widget: string, required: false }
+              - { name: pos, widget: hidden, required: false }
+              - { name: anchors, widget: hidden, required: false }
+              - { name: leadDir, widget: hidden, required: false }
+              - { name: viewDir, widget: hidden, required: false }
+              - { name: leadLen, widget: hidden, required: false }
+              - { name: snapToSurface, widget: hidden, required: false }
+          - name: scenes
+            label: "Vues 3D intérieures (superspl.at)"
+            label_singular: "Vue 3D"
+            widget: list
+            required: false
+            summary: "{{fields.label}}"
+            fields:
+              - { name: label, label: "Nom du bouton", widget: string }
+              - { name: src, label: "Scène superspl.at (id ou lien)", widget: string }
+          - name: panoramas
+            label: "Panoramas 360° (plein cadre)"
+            label_singular: "Panorama"
+            widget: list
+            required: false
+            summary: "{{fields.label}}"
+            fields:
+              - { name: label, label: "Nom", widget: string }
+              - { name: src, label: "Image/vidéo 360° (lien ou chemin)", widget: string }
