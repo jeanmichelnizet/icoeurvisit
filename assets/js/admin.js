@@ -325,6 +325,18 @@
     return h.media;
   }
   function onlineMedia(hi, kind) { return (published[hi] && published[hi].media && published[hi].media[kind]) || null; }
+  // Nom de fichier UNIQUE pour chaque photo ajoutée (les photos d'iPhone s'appellent
+  // souvent toutes « image.jpg » → sans ça, deux photos écrasent la même vignette).
+  function uniqueImagePath(hi, file) {
+    const id = model.hotspots[hi].id;
+    const base = 'assets/photos/' + id + '-' + slug(file.name.replace(/\.[^.]+$/, ''));
+    const e = ext(file.name);
+    const taken = new Set(model.hotspots[hi].media.images);
+    pending.forEach((_v, k) => taken.add(k));
+    let p = base + '.' + e, n = 1;
+    while (taken.has(p)) { n++; p = base + '-' + n + '.' + e; }
+    return p;
+  }
 
   hotspotsEl.addEventListener('input', (e) => {
     const el = e.target;
@@ -352,13 +364,17 @@
       renderHotspots();
     } else if (el.dataset.imgadd != null) {           // ajouter une photo à la galerie
       const hi = +el.dataset.imgadd; const file = el.files && el.files[0]; if (!file) return;
-      const path = 'assets/photos/' + model.hotspots[hi].id + '-' + slug(file.name.replace(/\.[^.]+$/, '')) + '.' + ext(file.name);
-      ensureMedia(hi); model.hotspots[hi].media.images.push(path);
+      ensureMedia(hi);
+      const path = uniqueImagePath(hi, file);
+      model.hotspots[hi].media.images.push(path);
       pending.set(path, { path, file }); setPreview(path, file);
+      el.value = '';                                  // autorise à re-choisir le même fichier ensuite
       renderHotspots();
     } else if (el.dataset.imgurl != null) {           // ajouter une photo par lien
-      const hi = +el.dataset.imgurl; const v = el.value.trim();
-      if (v) { ensureMedia(hi); model.hotspots[hi].media.images.push(v); renderHotspots(); }
+      const hi = +el.dataset.imgurl; ensureMedia(hi); const v = el.value.trim();
+      if (v && !model.hotspots[hi].media.images.includes(v)) model.hotspots[hi].media.images.push(v);
+      el.value = '';
+      renderHotspots();
     } else if (el.dataset.url != null) { renderHotspots(); }
   });
   hotspotsEl.addEventListener('click', (e) => {

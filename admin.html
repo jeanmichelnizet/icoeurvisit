@@ -123,8 +123,16 @@
 
   @media (max-width:680px){ .cols{grid-template-columns:1fr;gap:8px} }
 </style>
-<script src="assets/js/content.js" defer></script>
-<script src="assets/js/admin.js" defer></script>
+<script>
+  // Charge toujours la DERNIÈRE version de l'éditeur (contourne tout cache navigateur/SW).
+  (function () {
+    var v = '?v=' + Date.now();
+    ['assets/js/content.js', 'assets/js/admin.js'].forEach(function (src) {
+      var s = document.createElement('script');
+      s.src = src + v; s.async = false; document.head.appendChild(s);
+    });
+  })();
+</script>
 </head>
 <body>
 <div id="admin-progress"><span></span></div>
