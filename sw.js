@@ -11,7 +11,7 @@
 // Bump CACHE to invalidate everything on the next visit.
 // ============================================================
 
-const CACHE = 'ic-cache-v4';
+const CACHE = 'ic-cache-v5';
 
 // Precache the app shell so the very first offline load works. The heavy
 // media (GLB, audio) is cached on demand instead, to keep install light.
@@ -70,7 +70,9 @@ self.addEventListener('fetch', (event) => {
 async function networkFirst(req) {
   const cache = await caches.open(CACHE);
   try {
-    const fresh = await fetch(req);
+    // { cache: 'no-store' } = on IGNORE le cache HTTP du navigateur (GitHub sert le shell
+    // avec max-age=600 → sinon on resservirait un JS périmé pendant 10 min malgré le « réseau d'abord »).
+    const fresh = await fetch(req, { cache: 'no-store' });
     if (fresh && fresh.ok) cache.put(req, fresh.clone());
     return fresh;
   } catch (e) {

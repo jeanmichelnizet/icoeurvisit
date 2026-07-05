@@ -66,8 +66,18 @@
   // ---- PWA: register the service worker (offline resilience + install) ----
   // Loaded site-wide from here (the one script present on every page).
   if ('serviceWorker' in navigator) {
+    // Quand une nouvelle version du service worker prend la main, on recharge UNE fois
+    // pour exécuter le code frais (sinon l'ancien JS resterait actif jusqu'à fermeture des onglets).
+    let _swReloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (_swReloaded) return;
+      _swReloaded = true;
+      location.reload();
+    });
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(() => { /* SW optional */ });
+      navigator.serviceWorker.register('sw.js')
+        .then((reg) => { try { reg.update(); } catch (e) {} })
+        .catch(() => { /* SW optional */ });
     });
   }
 })();
