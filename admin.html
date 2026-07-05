@@ -121,7 +121,17 @@
   #pub-banner.pub{background:#9a6410}
   #pub-banner.ok{background:#16a34a}
 
-  @media (max-width:680px){ .cols{grid-template-columns:1fr;gap:8px} }
+  @media (max-width:680px){
+    .cols{grid-template-columns:1fr;gap:8px}
+    /* En-tête en grille nette : marque / statut / (reconnecter) / aperçu+enregistrer */
+    header.top{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px;align-items:stretch}
+    header.top .brand{grid-column:1 / -1;margin:0 0 2px}
+    #conn-status{grid-column:1 / -1;justify-self:center}
+    #connect-btn{grid-column:1 / -1}
+    #preview-btn{grid-column:1}
+    #save-btn{grid-column:2}
+    header.top .btn{width:100%;text-align:center}
+  }
 </style>
 <script>
   // Charge toujours la DERNIÈRE version de l'éditeur (contourne tout cache navigateur/SW).
