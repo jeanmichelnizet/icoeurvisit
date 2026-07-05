@@ -13,7 +13,8 @@
 # ============================================================
 set -euo pipefail
 cd "$(dirname "$0")/.."
-set -a; . ./.env; set +a
+# En local on lit .env ; en CI (GitHub Actions) les variables viennent des secrets.
+[ -f .env ] && { set -a; . ./.env; set +a; }
 
 STAGE="$(mktemp -d)"
 ZIPDIR="$(mktemp -d)"
@@ -24,7 +25,7 @@ trap 'rm -rf "$STAGE" "$ZIPDIR"' EXIT
 cp -R *.html assets manifest.webmanifest sw.js "$STAGE"/
 
 # 2) verrou d'accès : gate.js avec l'empreinte SHA-256 du mot de passe
-HASH=$(printf '%s' "$SITE_AUTH_PASS" | shasum -a 256 | awk '{print $1}')
+HASH=$(printf '%s' "$SITE_AUTH_PASS" | { command -v shasum >/dev/null 2>&1 && shasum -a 256 || sha256sum; } | awk '{print $1}')
 sed "s/__HASH__/$HASH/" scripts/gate.template.js > "$STAGE/assets/js/gate.js"
 
 # 3) injecter le verrou + noindex dans le <head> de chaque page publiée
