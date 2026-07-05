@@ -19,6 +19,11 @@
   // Instantané de ce qui est EN LIGNE (immuable) — pour les vignettes vertes.
   const published = clone(window.HOTSPOTS) || [];
   const publishedPanos = clone(window.PANORAMAS) || [];
+  // Chaque point a media.images (tableau) — compat avec l'ancien media.image unique.
+  [model.hotspots, published].forEach((list) => (list || []).forEach((h) => {
+    if (!h.media) h.media = { video: null, photo360: null, image: null };
+    if (!Array.isArray(h.media.images)) h.media.images = h.media.image ? [h.media.image] : [];
+  }));
 
   let token = null;
   try { token = localStorage.getItem(TOKEN_KEY) || null; } catch (e) {}
@@ -175,6 +180,8 @@
     const prev = saveBtn.textContent;
     progOn(); progSet(0.06);
     try {
+      // media.image (compat) = première photo de la galerie
+      model.hotspots.forEach((h) => { if (h.media) h.media.image = (h.media.images && h.media.images[0]) || null; });
       const items = Array.from(pending.values());
       const files = [];
       for (let i = 0; i < items.length; i++) {
@@ -242,6 +249,30 @@
     );
   }
 
+  // Galerie photo (plusieurs images par point) : vignettes vertes (en ligne) + rouges (à enregistrer).
+  function imageGallery(hIndex, h) {
+    const online = new Set((published[hIndex] && published[hIndex].media && published[hIndex].media.images) || []);
+    const imgs = (h.media && h.media.images) || [];
+    const thumbs = imgs.map((src, k) => {
+      const isNew = !online.has(src);
+      const raw = pending.has(src) ? previewURLs[src] : src;
+      const file = pending.has(src) ? (pending.get(src) || {}).file : null;
+      return thumbBox(raw, file, isNew ? 'new' : 'online', isNew ? 'à enregistrer' : 'En ligne', 'data-imgdel="' + hIndex + '|' + k + '"');
+    }).join('');
+    return (
+      '<div class="media-row">' +
+        '<div class="media-head"><span class="mlabel">Photos</span>' +
+          (imgs.length ? '' : '<span class="mcur"><em>aucune</em></span>') + '</div>' +
+        thumbs +
+        '<div class="media-inputs">' +
+          '<label class="filebtn">Ajouter une photo<input type="file" data-imgadd="' + hIndex + '" accept="image/*" /></label>' +
+          '<span class="or">ou</span>' +
+          '<input type="url" class="urlin" placeholder="https://… (lien) — Entrée pour ajouter" data-imgurl="' + hIndex + '" />' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
   function hotspotCard(h, i) {
     const en = h.en || (h.en = { title: '', eyebrow: '', text: '' });
     return (
@@ -254,7 +285,7 @@
             '<div class="col"><h4>English</h4>' + tfield(i, 'title', 'en', 'Title', en.title) + tfield(i, 'eyebrow', 'en', 'Eyebrow', en.eyebrow) + tarea(i, 'text', 'en', 'Description', en.text) + '</div>' +
           '</div>' +
           '<h4 class="media-title">Médias</h4>' +
-          mediaRow(i, h, 'image') + mediaRow(i, h, 'video') + mediaRow(i, h, 'photo360') +
+          imageGallery(i, h) + mediaRow(i, h, 'video') + mediaRow(i, h, 'photo360') +
         '</div>' +
       '</details>'
     );
@@ -263,7 +294,12 @@
   function tarea(i, field, lang, label, val) { return '<label class="fld"><span>' + label + '</span><textarea rows="5" data-h="' + i + '" data-field="' + field + '" data-lang="' + lang + '">' + esc(val) + '</textarea></label>'; }
   function renderHotspots() { hotspotsEl.innerHTML = model.hotspots.map(hotspotCard).join(''); }
 
-  function ensureMedia(hi) { return model.hotspots[hi].media || (model.hotspots[hi].media = { video: null, photo360: null, image: null }); }
+  function ensureMedia(hi) {
+    const h = model.hotspots[hi];
+    if (!h.media) h.media = { video: null, photo360: null, image: null };
+    if (!Array.isArray(h.media.images)) h.media.images = [];
+    return h.media;
+  }
   function onlineMedia(hi, kind) { return (published[hi] && published[hi].media && published[hi].media[kind]) || null; }
 
   hotspotsEl.addEventListener('input', (e) => {
@@ -290,9 +326,26 @@
       pending.set(slot, { path, file }); setPreview(slot, file);
       ensureMedia(+hi)[kind] = path;
       renderHotspots();
+    } else if (el.dataset.imgadd != null) {           // ajouter une photo à la galerie
+      const hi = +el.dataset.imgadd; const file = el.files && el.files[0]; if (!file) return;
+      const path = 'assets/photos/' + model.hotspots[hi].id + '-' + slug(file.name.replace(/\.[^.]+$/, '')) + '.' + ext(file.name);
+      ensureMedia(hi); model.hotspots[hi].media.images.push(path);
+      pending.set(path, { path, file }); setPreview(path, file);
+      renderHotspots();
+    } else if (el.dataset.imgurl != null) {           // ajouter une photo par lien
+      const hi = +el.dataset.imgurl; const v = el.value.trim();
+      if (v) { ensureMedia(hi); model.hotspots[hi].media.images.push(v); renderHotspots(); }
     } else if (el.dataset.url != null) { renderHotspots(); }
   });
   hotspotsEl.addEventListener('click', (e) => {
+    const imgdel = e.target.dataset.imgdel;
+    if (imgdel) {
+      e.preventDefault();
+      const parts = imgdel.split('|'); const hi = +parts[0], k = +parts[1];
+      const removed = ensureMedia(hi).images.splice(k, 1)[0];
+      if (pending.has(removed)) { pending.delete(removed); clearPreview(removed); }
+      renderHotspots(); return;
+    }
     const clr = e.target.dataset.clear, restore = e.target.dataset.restore;
     if (clr) {
       e.preventDefault();

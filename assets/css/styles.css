@@ -928,6 +928,24 @@ body.edit-mode .edit-toolbar { display: flex; }
   border-radius: var(--radius-md);
   border: 1px solid var(--line);
 }
+/* Galerie photo (carrousel) */
+.media-photo.gallery { position: relative; }
+.gal-prev, .gal-next {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 0; background: rgba(4, 13, 36, 0.55); color: #fff;
+  font-size: 24px; line-height: 1; cursor: pointer;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.gal-prev { left: 8px; }
+.gal-next { right: 8px; }
+.gal-prev:hover, .gal-next:hover { background: var(--rouge-soft); }
+.gal-count {
+  position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+  background: rgba(4, 13, 36, 0.6); color: #fff;
+  font-family: var(--font-mono); font-size: 11px;
+  padding: 4px 10px; border-radius: 999px;
+}
 
 /* 360° panorama viewer (see panorama.js) */
 .pano-embed {

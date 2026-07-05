@@ -726,6 +726,28 @@
         <div class="note">${T('visite.ph.image.note', 'Une photo HD de la zone du bateau viendra illustrer le descriptif.')}</div></div>`;
   }
 
+  // Galerie photo : une ou plusieurs images, avec flèches ‹ › si plusieurs.
+  function renderGallery(imgs, alt) {
+    let i = 0;
+    function draw() {
+      mediaContent.innerHTML = '<div class="media-photo gallery">' +
+        '<img src="' + imgs[i] + '" alt="' + esc(alt || '') + '" />' +
+        (imgs.length > 1
+          ? '<button class="gal-prev" type="button" aria-label="Photo précédente">‹</button>' +
+            '<button class="gal-next" type="button" aria-label="Photo suivante">›</button>' +
+            '<span class="gal-count">' + (i + 1) + ' / ' + imgs.length + '</span>'
+          : '') +
+        '</div>';
+      if (imgs.length > 1) {
+        mediaContent.querySelector('.gal-prev').addEventListener('click', () => { i = (i - 1 + imgs.length) % imgs.length; draw(); });
+        mediaContent.querySelector('.gal-next').addEventListener('click', () => { i = (i + 1) % imgs.length; draw(); });
+      }
+    }
+    draw();
+  }
+
+  function esc(s) { return (s == null ? '' : String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+
   function setMediaTab(media, hs) {
     document.querySelectorAll('.media-tab').forEach(t => {
       const on = t.dataset.media === media;
@@ -756,10 +778,11 @@
         mediaContent.innerHTML = panoPlaceholder360();
       }
     } else if (media === 'image') {
-      const url = hs.media && hs.media.image;
-      mediaContent.innerHTML = url
-        ? `<div class="media-photo"><img src="${url}" alt="${tr(hs, 'title')}" /></div>`
-        : imagePlaceholder();
+      const imgs = (hs.media && hs.media.images && hs.media.images.length)
+        ? hs.media.images
+        : ((hs.media && hs.media.image) ? [hs.media.image] : []);
+      if (imgs.length) renderGallery(imgs, tr(hs, 'title'));
+      else mediaContent.innerHTML = imagePlaceholder();
     }
   }
 
