@@ -14,7 +14,7 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
     "media": {
       "video": null,
       "photo360": null,
-      "image": "assets/photos/mat.jpg"
+      "image": "assets/photos/mat.jpeg"
     },
     "num": 1,
     "snapToSurface": false,
