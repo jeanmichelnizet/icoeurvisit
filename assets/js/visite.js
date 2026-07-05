@@ -802,6 +802,20 @@
     return null;
   }
 
+  // Build a YouTube embed URL from any YouTube link/id (360° videos play natively in the YT player).
+  function youtubeEmbedUrl(v) {
+    if (!v) return null;
+    v = String(v).trim();
+    let id = null, m;
+    if ((m = v.match(/youtube(?:-nocookie)?\.com\/embed\/([A-Za-z0-9_-]{6,})/i))) id = m[1];
+    else if ((m = v.match(/[?&]v=([A-Za-z0-9_-]{6,})/i))) id = m[1];
+    else if ((m = v.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/i))) id = m[1];
+    else if ((m = v.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]{6,})/i))) id = m[1];
+    else if (/^[A-Za-z0-9_-]{6,}$/.test(v)) id = v;   // identifiant nu
+    if (!id) return null;
+    return 'https://www.youtube.com/embed/' + id + '?rel=0&modestbranding=1&playsinline=1';
+  }
+
   let stagePano = null;
   function closeStagePano() {
     if (stagePano) { stagePano.destroy(); stagePano = null; }
@@ -845,8 +859,9 @@
       stage.appendChild(host);
     }
     host.querySelector('.scene-frame').innerHTML =
-      '<iframe class="scene-iframe" src="' + url + '" allow="fullscreen; xr-spatial-tracking" ' +
-      'allowfullscreen loading="lazy" title="Vue 3D intérieure"></iframe>';
+      '<iframe class="scene-iframe" src="' + url + '" ' +
+      'allow="accelerometer; autoplay; encrypted-media; gyroscope; fullscreen; xr-spatial-tracking" ' +
+      'allowfullscreen loading="lazy" title="Vue immersive"></iframe>';
     host.style.display = 'block';
     return true;
   }
@@ -875,6 +890,19 @@
     btn.setAttribute('role', 'tab');
     btn.setAttribute('aria-selected', 'false');
     btn.textContent = (s && s.label) || 'Vue 3D';
+    modeSwitch.appendChild(btn);
+  });
+
+  // Un bouton par vidéo 360° YouTube — ouvert en embed plein cadre (comme les scènes).
+  (window.VIDEOS360 || []).forEach((s) => {
+    const url = youtubeEmbedUrl(s && (s.src || s));
+    if (!url || !modeSwitch) return;
+    const btn = document.createElement('button');
+    btn.dataset.mode = 'scene';
+    btn.dataset.sceneUrl = url;
+    btn.setAttribute('role', 'tab');
+    btn.setAttribute('aria-selected', 'false');
+    btn.textContent = (s && s.label) || 'Vidéo 360°';
     modeSwitch.appendChild(btn);
   });
 

@@ -14,7 +14,8 @@
   const model = {
     hotspots: clone(window.HOTSPOTS) || [],
     panoramas: clone(window.PANORAMAS) || [],
-    scenes: clone(window.SCENES) || []
+    scenes: clone(window.SCENES) || [],
+    videos360: clone(window.VIDEOS360) || []
   };
   // Instantané de ce qui est EN LIGNE (immuable) — pour les vignettes vertes.
   const published = clone(window.HOTSPOTS) || [];
@@ -37,6 +38,7 @@
   const hotspotsEl = $('#hotspots');
   const panoramasEl = $('#panoramas');
   const scenesEl = $('#scenes');
+  const videos360El = $('#videos360');
   const toastEl = $('#toast');
   const progEl = $('#admin-progress');
   const progFill = progEl ? progEl.querySelector('span') : null;
@@ -138,7 +140,7 @@
   const previewBtn = $('#preview-btn');
   if (previewBtn) previewBtn.addEventListener('click', () => {
     try {
-      localStorage.setItem('ic:preview', JSON.stringify({ hotspots: model.hotspots, panoramas: model.panoramas, scenes: model.scenes }));
+      localStorage.setItem('ic:preview', JSON.stringify({ hotspots: model.hotspots, panoramas: model.panoramas, scenes: model.scenes, videos360: model.videos360 }));
     } catch (e) { toast('Aperçu indisponible (stockage du navigateur).', 'err'); return; }
     window.open('visite.html?preview=1', '_blank');
   });
@@ -185,9 +187,10 @@
       "const HOTSPOTS = (_pv && _pv.hotspots) || " + d(model.hotspots) + ";\n\n" +
       "const PANORAMAS = (_pv && _pv.panoramas) || " + d(model.panoramas) + ";\n\n" +
       "const SCENES = (_pv && _pv.scenes) || " + d(model.scenes) + ";\n\n" +
-      "if (typeof window !== 'undefined') {\n  window.HOTSPOTS = HOTSPOTS;\n  window.PANORAMAS = PANORAMAS;\n  window.SCENES = SCENES;\n" +
+      "const VIDEOS360 = (_pv && _pv.videos360) || " + d(model.videos360) + ";\n\n" +
+      "if (typeof window !== 'undefined') {\n  window.HOTSPOTS = HOTSPOTS;\n  window.PANORAMAS = PANORAMAS;\n  window.SCENES = SCENES;\n  window.VIDEOS360 = VIDEOS360;\n" +
       "  if (_pv) {\n    window.addEventListener('DOMContentLoaded', function () {\n      var b = document.createElement('div');\n      b.textContent = 'Aperçu des modifications — non publié';\n      b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483646;background:#9a6410;color:#fff;font:600 12px/1.2 -apple-system,Arial,sans-serif;text-align:center;padding:9px';\n      document.body.appendChild(b);\n    });\n  }\n}\n" +
-      "if (typeof module !== 'undefined') module.exports = { HOTSPOTS, PANORAMAS, SCENES };\n"
+      "if (typeof module !== 'undefined') module.exports = { HOTSPOTS, PANORAMAS, SCENES, VIDEOS360 };\n"
     );
   }
 
@@ -207,7 +210,7 @@
         files.push({ path: items[i].path, base64: await fileToB64(items[i].file) });
       }
       saveBtn.textContent = 'Publication…';
-      const json = JSON.stringify({ hotspots: model.hotspots, panoramas: model.panoramas, scenes: model.scenes }, null, 2) + '\n';
+      const json = JSON.stringify({ hotspots: model.hotspots, panoramas: model.panoramas, scenes: model.scenes, videos360: model.videos360 }, null, 2) + '\n';
       files.push({ path: 'content.json', base64: b64text(json) });
       files.push({ path: 'assets/js/content.js', base64: b64text(buildContentJs()) });
       progSet(0.7);
@@ -490,8 +493,37 @@
     if (del != null) { model.scenes.splice(+del, 1); renderScenes(); }
   });
 
+  // ---- rendering: vidéos 360° (YouTube) ------------------------------------
+  function renderVideos360() {
+    if (!videos360El) return;
+    const rows = model.videos360.map((s, i) => {
+      const src = (s && s.src) || (typeof s === 'string' ? s : '') || '';
+      const label = (s && s.label) || '';
+      return (
+        '<div class="pano">' +
+          '<label class="fld"><span>Nom du bouton</span><input type="text" data-vid="' + i + '" data-vfield="label" value="' + esc(label) + '" placeholder="ex. Départ du Vendée Globe" /></label>' +
+          '<label class="fld"><span>Lien de la vidéo YouTube 360°</span><input type="text" data-vid="' + i + '" data-vfield="src" value="' + esc(src) + '" placeholder="https://www.youtube.com/watch?v=…  ou  https://youtu.be/…" /></label>' +
+          '<button class="link danger" data-viddel="' + i + '">supprimer</button>' +
+        '</div>'
+      );
+    }).join('');
+    videos360El.innerHTML = rows + '<button class="btn ghost" id="vid-add">+ Ajouter une vidéo 360° YouTube</button>';
+  }
+  if (videos360El) {
+    videos360El.addEventListener('input', (e) => {
+      const el = e.target; if (el.dataset.vid == null) return;
+      const i = +el.dataset.vid; let s = model.videos360[i]; if (typeof s !== 'object' || s == null) { s = { src: '', label: '' }; model.videos360[i] = s; }
+      s[el.dataset.vfield] = el.value.trim();
+    });
+    videos360El.addEventListener('click', (e) => {
+      if (e.target.id === 'vid-add') { model.videos360.push({ src: '', label: '' }); renderVideos360(); return; }
+      const del = e.target.dataset.viddel;
+      if (del != null) { model.videos360.splice(+del, 1); renderVideos360(); }
+    });
+  }
+
   // ---- boot ----------------------------------------------------------------
-  function renderAll() { renderHotspots(); renderPanoramas(); renderScenes(); }
+  function renderAll() { renderHotspots(); renderPanoramas(); renderScenes(); renderVideos360(); }
   setStatus(token ? 'connected' : 'idle');
   renderAll();
 })();
