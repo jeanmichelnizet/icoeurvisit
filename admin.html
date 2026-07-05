@@ -97,12 +97,27 @@
   .toast.warn{background:var(--warn)}
   .toast.err{background:var(--danger)}
 
+  .btn.preview{background:var(--ok);color:#fff;border-color:var(--ok)}
+  .btn.preview:hover{background:#0b5f47}
+
+  #admin-progress{position:fixed;left:0;right:0;top:0;height:3px;z-index:100;display:none;background:rgba(227,6,19,.15)}
+  #admin-progress.on{display:block}
+  #admin-progress span{display:block;height:100%;width:0;background:var(--accent);transition:width .3s ease}
+
+  .thumb{position:relative;display:inline-flex;align-items:center;gap:10px;margin:0 0 10px;padding:6px 12px 6px 6px;border:1px solid var(--line);border-radius:10px;background:#fff;max-width:100%}
+  .thumb img{width:60px;height:60px;object-fit:cover;border-radius:6px;display:block;background:#eef1f5}
+  .thumb .filechip{width:60px;height:60px;border-radius:6px;background:#eef1f5;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:22px}
+  .thumb .thumb-name{font-family:var(--mono);font-size:11px;color:var(--muted);word-break:break-all}
+  .thumb-x{position:absolute;top:-9px;right:-9px;width:22px;height:22px;padding:0;border:2px solid #fff;border-radius:50%;background:var(--danger);color:#fff;font-size:14px;line-height:1;cursor:pointer;box-shadow:0 1px 5px rgba(0,0,0,.35)}
+  .thumb-x:hover{background:#a00d18}
+
   @media (max-width:680px){ .cols{grid-template-columns:1fr;gap:8px} }
 </style>
 <script src="assets/js/content.js" defer></script>
 <script src="assets/js/admin.js" defer></script>
 </head>
 <body>
+<div id="admin-progress"><span></span></div>
 <header class="top">
   <div class="brand">
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -113,7 +128,7 @@
   </div>
   <span class="status" id="conn-status">Non connecté</span>
   <button class="btn line" id="connect-btn">Se connecter à GitHub</button>
-  <button class="btn line" id="preview-btn">Aperçu du site ↗</button>
+  <button class="btn preview" id="preview-btn">Aperçu du site ↗</button>
   <button class="btn primary" id="save-btn">Enregistrer</button>
 </header>
 
