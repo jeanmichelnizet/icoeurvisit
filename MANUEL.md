@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Site public** | https://jeanmichelnizet.github.io/icoeurvisit/ |
-| **Mot de passe visiteur** | `Coeur-XllTfOQ` |
+| **Mot de passe visiteur** | `communiqué séparément` |
 | **Administration (éditeur)** | https://jeanmichelnizet.github.io/icoeurvisit/admin.html |
 | **Dépôt du code (GitHub)** | https://github.com/jeanmichelnizet/icoeurvisit |
 
@@ -13,13 +13,13 @@ Le **mot de passe visiteur** protège l'accès au site (à donner aux personnes 
 
 ## 2. Les deux niveaux d'accès
 
-- **Mot de passe visiteur** (`Coeur-XllTfOQ`) : pour *voir* le site et pour *ouvrir* l'admin.
+- **Mot de passe visiteur** (`communiqué séparément`) : pour *voir* le site et pour *ouvrir* l'admin.
 - **Connexion GitHub** (ton compte `jeanmichelnizet`) : nécessaire uniquement pour **enregistrer** des modifications dans l'admin.
 
 ## 3. Modifier le contenu — pas à pas
 
 1. Ouvre **https://initiatives-coeur-visite.netlify.app/admin.html**
-2. Saisis le **mot de passe visiteur** (`Coeur-XllTfOQ`).
+2. Saisis le **mot de passe visiteur** (`communiqué séparément`).
 3. Clique **« Se connecter à GitHub »** → autorise (à faire une fois par session).
 4. Modifie ce que tu veux (voir §4).
 5. Clique **« Enregistrer »**.

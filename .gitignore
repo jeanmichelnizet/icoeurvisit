@@ -18,3 +18,7 @@ publish/
 
 # Claude Code (local)
 .claude/
+
+# Notes de reprise perso (contiennent mot de passe/jeton) — NE JAMAIS publier
+RECAP-coeur-visite-3d.md
+RECAP-coeur-visite-3d.txt
