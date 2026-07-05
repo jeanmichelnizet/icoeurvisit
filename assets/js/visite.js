@@ -883,6 +883,8 @@
     if (!b) return;
     const mode = b.dataset.mode;
     track('mode:switch', { mode });
+    // Changer de vue (intérieure / 360° / vidéo…) referme le panneau d'un point ouvert.
+    closePanel();
     if (mode === '3d') { goto3d(); return; }
     if (mode === 'scene') {
       closeStagePano();
