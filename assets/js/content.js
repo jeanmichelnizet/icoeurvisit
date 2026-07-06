@@ -316,6 +316,10 @@ const VIDEOS360 = (_pv && _pv.videos360) || [
   {
     "src": "https://www.youtube.com/watch?v=GtpjJtcwbns",
     "label": "Navigation en 360"
+  },
+  {
+    "src": "https://cdn.aframe.io/360-video-boilerplate/video/city.mp4",
+    "label": "Test 360° (démo)"
   }
 ];
 

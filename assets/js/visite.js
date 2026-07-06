@@ -893,16 +893,25 @@
     modeSwitch.appendChild(btn);
   });
 
-  // Un bouton par vidéo 360° YouTube — ouvert en embed plein cadre (comme les scènes).
+  // Un bouton par vidéo 360°. Fichier MP4/WebM auto-hébergé → notre lecteur 360°
+  // (navigation garantie partout). Lien YouTube → embed (à plat : YouTube ne fait
+  // pas la navigation 360° en iframe).
+  const isVideoFile = (u) => /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(u || '');
   (window.VIDEOS360 || []).forEach((s) => {
-    const url = youtubeEmbedUrl(s && (s.src || s));
-    if (!url || !modeSwitch) return;
+    const raw = (s && (s.src || s)) || '';
+    if (!raw || !modeSwitch) return;
     const btn = document.createElement('button');
-    btn.dataset.mode = 'scene';
-    btn.dataset.sceneUrl = url;
     btn.setAttribute('role', 'tab');
     btn.setAttribute('aria-selected', 'false');
     btn.textContent = (s && s.label) || 'Vidéo 360°';
+    if (isVideoFile(raw) || !/^https?:\/\//i.test(raw)) {   // fichier vidéo (uploadé ou lien direct)
+      btn.dataset.mode = 'video360';
+      btn.dataset.videoUrl = raw;
+    } else {                                                // lien YouTube / autre embed
+      const yt = youtubeEmbedUrl(raw);
+      btn.dataset.mode = 'scene';
+      btn.dataset.sceneUrl = yt || raw;
+    }
     modeSwitch.appendChild(btn);
   });
 
@@ -917,6 +926,11 @@
     if (mode === 'scene') {
       closeStagePano();
       if (openScene(b.dataset.sceneUrl)) setActiveBtn(b); else goto3d();
+      return;
+    }
+    if (mode === 'video360') {          // vidéo 360° équirectangulaire dans notre lecteur maison
+      closeScene();
+      if (openStagePano(b.dataset.videoUrl)) setActiveBtn(b); else goto3d();
       return;
     }
     if (mode === '360') {

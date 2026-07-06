@@ -54,7 +54,7 @@ self.addEventListener('fetch', (event) => {
 
   // Médias éditables (photos/vidéos/panoramas) : toujours frais depuis le réseau,
   // pour ne jamais rester bloqué sur une ancienne version cassée.
-  if (/\/assets\/(photos|videos|panoramas)\//.test(url.pathname)) return;
+  if (/\/assets\/(photos|videos|panoramas|videos360)\//.test(url.pathname)) return;
 
   const sameOrigin = url.origin === self.location.origin;
 

@@ -493,32 +493,66 @@
     if (del != null) { model.scenes.splice(+del, 1); renderScenes(); }
   });
 
-  // ---- rendering: vidéos 360° (YouTube) ------------------------------------
+  // ---- rendering: vidéos 360° (fichier équirectangulaire OU lien) ----------
   function renderVideos360() {
     if (!videos360El) return;
     const rows = model.videos360.map((s, i) => {
       const src = (s && s.src) || (typeof s === 'string' ? s : '') || '';
       const label = (s && s.label) || '';
+      const slot = 'vid360:' + i;
+      const pend = pending.get(slot);
+      const isYT = /youtu\.?be|youtube\.com/i.test(src);
+      const isFileSrc = src && !/^https?:\/\//i.test(src);   // chemin relatif = fichier auto-hébergé
+      let thumb = '';
+      if (pend) {
+        thumb = '<div class="thumb new"><span class="filechip">▸</span><span class="thumb-name">' + esc(pend.file.name) + ' · à enregistrer</span>' +
+          '<button class="thumb-x" title="Retirer" data-vidclear="' + i + '">×</button></div>';
+      } else if (src) {
+        const note = isYT ? ' · ⚠ YouTube (s’affiche à plat, pas de navigation)' : ' · en ligne ✓';
+        thumb = '<div class="thumb online"><span class="filechip">▸</span><span class="thumb-name">' + esc(src.split('/').pop()) + note + '</span></div>';
+      }
       return (
         '<div class="pano">' +
-          '<label class="fld"><span>Nom du bouton</span><input type="text" data-vid="' + i + '" data-vfield="label" value="' + esc(label) + '" placeholder="ex. Départ du Vendée Globe" /></label>' +
-          '<label class="fld"><span>Lien de la vidéo YouTube 360°</span><input type="text" data-vid="' + i + '" data-vfield="src" value="' + esc(src) + '" placeholder="https://www.youtube.com/watch?v=…  ou  https://youtu.be/…" /></label>' +
+          '<label class="fld"><span>Nom du bouton</span><input type="text" data-vid="' + i + '" data-vfield="label" value="' + esc(label) + '" placeholder="ex. Pont avant" /></label>' +
+          '<div class="media-row">' +
+            '<div class="media-head"><span class="mlabel">Vidéo 360° (fichier .mp4 équirectangulaire, ≤100 Mo)</span>' +
+              (src || pend ? '' : '<span class="mcur"><em>aucune</em></span>') + '</div>' +
+            thumb +
+            '<div class="media-inputs">' +
+              '<label class="filebtn">Choisir un fichier vidéo<input type="file" accept="video/*" data-vidfile="' + i + '" /></label>' +
+              '<span class="or">ou</span>' +
+              '<input type="url" class="urlin" placeholder="https://… (lien direct .mp4)" data-vid="' + i + '" data-vfield="src" value="' + (isFileSrc || isYT ? '' : esc(src)) + '" />' +
+            '</div>' +
+          '</div>' +
           '<button class="link danger" data-viddel="' + i + '">supprimer</button>' +
         '</div>'
       );
     }).join('');
-    videos360El.innerHTML = rows + '<button class="btn ghost" id="vid-add">+ Ajouter une vidéo 360° YouTube</button>';
+    videos360El.innerHTML = rows + '<button class="btn ghost" id="vid-add">+ Ajouter une vidéo 360°</button>';
   }
   if (videos360El) {
     videos360El.addEventListener('input', (e) => {
       const el = e.target; if (el.dataset.vid == null) return;
       const i = +el.dataset.vid; let s = model.videos360[i]; if (typeof s !== 'object' || s == null) { s = { src: '', label: '' }; model.videos360[i] = s; }
-      s[el.dataset.vfield] = el.value.trim();
+      if (el.dataset.vfield === 'src') { pending.delete('vid360:' + i); clearPreview('vid360:' + i); s.src = el.value.trim(); }
+      else s[el.dataset.vfield] = el.value.trim();
+    });
+    videos360El.addEventListener('change', (e) => {
+      const el = e.target; if (el.dataset.vidfile == null) return;
+      const i = +el.dataset.vidfile; const file = el.files && el.files[0]; if (!file) return;
+      const slot = 'vid360:' + i;
+      const path = 'assets/videos360/' + slug(file.name.replace(/\.[^.]+$/, '')) + '.' + ext(file.name);
+      let s = model.videos360[i]; if (typeof s !== 'object' || s == null) { s = { src: '', label: '' }; model.videos360[i] = s; }
+      s.src = path; pending.set(slot, { path, file });
+      el.value = '';
+      renderVideos360();
     });
     videos360El.addEventListener('click', (e) => {
       if (e.target.id === 'vid-add') { model.videos360.push({ src: '', label: '' }); renderVideos360(); return; }
       const del = e.target.dataset.viddel;
-      if (del != null) { model.videos360.splice(+del, 1); renderVideos360(); }
+      if (del != null) { pending.delete('vid360:' + del); clearPreview('vid360:' + del); model.videos360.splice(+del, 1); renderVideos360(); return; }
+      const clr = e.target.dataset.vidclear;
+      if (clr != null) { pending.delete('vid360:' + clr); clearPreview('vid360:' + clr); if (model.videos360[+clr]) model.videos360[+clr].src = ''; renderVideos360(); }
     });
   }
 
