@@ -12,8 +12,8 @@ var _pv = (function () {
 const HOTSPOTS = (_pv && _pv.hotspots) || [
   {
     "media": {
-      "video": null,
-      "photo360": null,
+      "video": "https://mdn.github.io/shared-assets/videos/flower.mp4",
+      "photo360": "https://threejs.org/examples/textures/2294472375_24a3b8ef46_o.jpg",
       "image": "assets/photos/mat-matage-imoca-initiatives-c-ur-quatrieme-du-nom-09.jpg",
       "images": [
         "assets/photos/mat-matage-imoca-initiatives-c-ur-quatrieme-du-nom-09.jpg"
@@ -49,8 +49,8 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
   },
   {
     "media": {
-      "video": null,
-      "photo360": null,
+      "video": "https://mdn.github.io/shared-assets/videos/flower.mp4",
+      "photo360": "https://threejs.org/examples/textures/2294472375_24a3b8ef46_o.jpg",
       "image": "assets/photos/foil-babord.png",
       "images": [
         "assets/photos/foil-babord.png"
@@ -86,10 +86,13 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
   },
   {
     "media": {
-      "video": null,
-      "photo360": null,
-      "image": null,
-      "images": []
+      "video": "https://mdn.github.io/shared-assets/videos/flower.mp4",
+      "photo360": "https://threejs.org/examples/textures/2294472375_24a3b8ef46_o.jpg",
+      "image": "https://picsum.photos/id/1016/1200/800.jpg",
+      "images": [
+        "https://picsum.photos/id/1016/1200/800.jpg",
+        "https://picsum.photos/id/1039/1200/800.jpg"
+      ]
     },
     "num": 3,
     "snapToSurface": false,
@@ -121,10 +124,12 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
   },
   {
     "media": {
-      "video": null,
-      "photo360": null,
-      "image": null,
-      "images": []
+      "video": "https://mdn.github.io/shared-assets/videos/flower.mp4",
+      "photo360": "https://threejs.org/examples/textures/2294472375_24a3b8ef46_o.jpg",
+      "image": "https://picsum.photos/id/1043/1200/800.jpg",
+      "images": [
+        "https://picsum.photos/id/1043/1200/800.jpg"
+      ]
     },
     "num": 4,
     "snapToSurface": false,
@@ -156,10 +161,12 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
   },
   {
     "media": {
-      "video": null,
+      "video": "https://mdn.github.io/shared-assets/videos/flower.mp4",
       "photo360": "https://www.youtube.com/watch?v=GtpjJtcwbns",
-      "image": null,
-      "images": []
+      "image": "https://picsum.photos/id/1058/1200/800.jpg",
+      "images": [
+        "https://picsum.photos/id/1058/1200/800.jpg"
+      ]
     },
     "num": 5,
     "snapToSurface": false,
@@ -191,10 +198,12 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
   },
   {
     "media": {
-      "video": null,
-      "photo360": null,
-      "image": null,
-      "images": []
+      "video": "https://mdn.github.io/shared-assets/videos/flower.mp4",
+      "photo360": "https://threejs.org/examples/textures/2294472375_24a3b8ef46_o.jpg",
+      "image": "https://picsum.photos/id/1069/1200/800.jpg",
+      "images": [
+        "https://picsum.photos/id/1069/1200/800.jpg"
+      ]
     },
     "num": 6,
     "snapToSurface": false,
@@ -226,10 +235,12 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
   },
   {
     "media": {
-      "video": null,
-      "photo360": null,
-      "image": null,
-      "images": []
+      "video": "https://mdn.github.io/shared-assets/videos/flower.mp4",
+      "photo360": "https://threejs.org/examples/textures/2294472375_24a3b8ef46_o.jpg",
+      "image": "https://picsum.photos/id/1074/1200/800.jpg",
+      "images": [
+        "https://picsum.photos/id/1074/1200/800.jpg"
+      ]
     },
     "num": 7,
     "snapToSurface": false,
@@ -261,10 +272,12 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
   },
   {
     "media": {
-      "video": null,
-      "photo360": null,
-      "image": null,
-      "images": []
+      "video": "https://mdn.github.io/shared-assets/videos/flower.mp4",
+      "photo360": "https://threejs.org/examples/textures/2294472375_24a3b8ef46_o.jpg",
+      "image": "https://picsum.photos/id/1084/1200/800.jpg",
+      "images": [
+        "https://picsum.photos/id/1084/1200/800.jpg"
+      ]
     },
     "num": 8,
     "snapToSurface": false,
@@ -303,7 +316,16 @@ const HOTSPOTS = (_pv && _pv.hotspots) || [
   }
 ];
 
-const PANORAMAS = (_pv && _pv.panoramas) || [];
+const PANORAMAS = (_pv && _pv.panoramas) || [
+  {
+    "src": "https://threejs.org/examples/textures/2294472375_24a3b8ef46_o.jpg",
+    "label": "Panorama image (démo)"
+  },
+  {
+    "src": "https://cdn.aframe.io/360-video-boilerplate/video/city.mp4",
+    "label": "Panorama vidéo (démo)"
+  }
+];
 
 const SCENES = (_pv && _pv.scenes) || [
   {
