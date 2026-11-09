@@ -294,6 +294,12 @@ body { margin: 0; min-height: 100vh; }
 .auth .linkbtn { font-size: 13px; }
 .auth .msg.info { color: var(--ink-2); }
 
+code.pwd{font-family:var(--f-data);font-size:13px;background:var(--edit-bg);border:1px solid var(--hair);border-radius:4px;padding:1px 6px;user-select:all}
+.pwline{font-size:12.5px;display:inline-block;margin-top:4px}
+a.linkbtn{font-size:13px}
+#users td.e a.linkbtn,#users td.e .hint{margin-left:10px}
+a.btn{text-decoration:none;display:inline-block}
+#users td.e{white-space:normal}
 </style>
 </head>
 <body>
@@ -379,8 +385,9 @@ body { margin: 0; min-height: 100vh; }
   </section>
 
   <section class="view" id="v-journal" aria-labelledby="h-journal" hidden>
-    <div class="view-head"><div><h2 id="h-journal">Journal des modifications</h2><p>Qui a changé quoi, et quand, des plus récentes aux plus anciennes. Une action supprimée peut être rétablie d’ici.</p></div></div>
+    <div class="view-head"><div><h2 id="h-journal">Journal des modifications</h2><p>Qui a changé quoi, et quand, des plus récentes aux plus anciennes. Une action supprimée peut être rétablie d’ici. Les administrateurs y voient aussi toutes les connexions.</p></div></div>
     <div class="toolbar">
+      <label class="field" id="j-kind-wrap" hidden>Afficher <select id="j-kind"><option value="">Modifications et connexions</option><option value="edit">Modifications seulement</option><option value="login">Connexions seulement</option></select></label>
       <label class="field">Personne <select id="j-user"><option value="">Tout le monde</option></select></label>
       <label class="field">Dossier <select id="j-g"><option value="">Tous les dossiers</option></select></label>
     </div>
@@ -393,7 +400,7 @@ body { margin: 0; min-height: 100vh; }
   </section>
 
   <section class="view" id="v-comptes" aria-labelledby="h-comptes" hidden>
-    <div class="view-head"><div><h2 id="h-comptes">Comptes</h2><p>Créez un compte par personne. L’application génère un mot de passe provisoire à lui transmettre ; elle choisira le sien à sa première connexion. Un compte désactivé ne peut plus se connecter, mais ses modifications restent signées dans le journal.</p></div></div>
+    <div class="view-head"><div><h2 id="h-comptes">Comptes</h2><p>Créez un compte par personne. L’application génère un mot de passe provisoire, que vous pouvez lui envoyer par mail ; la personne choisira le sien à sa première connexion. Vous pouvez revoir un mot de passe provisoire, ou en imposer un nouveau à tout moment. Un mot de passe choisi par la personne elle-même n’est jamais visible. Un compte désactivé ne peut plus se connecter, mais ses modifications restent signées dans le journal.</p></div></div>
     <div class="warnbox" id="sec-warn" hidden></div>
     <div class="panel">
       <h3>Nouveau compte</h3>
@@ -407,7 +414,7 @@ body { margin: 0; min-height: 100vh; }
       </form>
       <div class="tempbox" id="temp" hidden></div>
     </div>
-    <div class="tablewrap"><table id="users"><thead><tr><th>Nom</th><th>Identifiant</th><th>Rôle</th><th>Dernière connexion</th><th>État</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div class="tablewrap"><table id="users"><thead><tr><th>Nom</th><th>Identifiant</th><th>Rôle</th><th>Dernière connexion</th><th>État et mot de passe</th><th></th></tr></thead><tbody></tbody></table></div>
   </section>
 
   <section class="view" id="v-compte" aria-labelledby="h-compte" hidden>
@@ -465,7 +472,7 @@ body { margin: 0; min-height: 100vh; }
   let G = [], GI = {}, PERIODS = [], BANDS = [], NODES = [], EDGES = [], NI = {};
   let TASKS = [], BYID = {}, NAMES = {}, REV = 0, LOADED = false, LOG = [], LOGDEL = new Set(), USERS = [];
   let TODAY = today(), pendingList = false, lastSync = null;
-  const state = { on: null, view: 'planning', preset: 'tout', gsel: null, psel: null, editId: null, confirmDel: false, hideDone: false, uEdit: null, uReset: null };
+  const state = { on: null, view: 'planning', preset: 'tout', gsel: null, psel: null, editId: null, confirmDel: false, hideDone: false, uEdit: null, uReset: null, uShow: null };
   try { const p = localStorage.getItem('ic27-periode'); if (PRESETS[p]) state.preset = p; } catch (e) { }
   try { state.hideDone = localStorage.getItem('ic27-masquer') === '1'; } catch (e) { }
 
@@ -590,6 +597,7 @@ body { margin: 0; min-height: 100vh; }
     show('app');
     renderUser();
     $('#tab-comptes').hidden = !isAdmin();
+    $('#j-kind-wrap').hidden = !isAdmin();
     $('#add').hidden = !canEdit();
     $('#liste-p').textContent = canEdit() ? 'Cochez une action quand elle est faite, ou ouvrez-la pour changer sa date, son intitulé, son détail ou son dossier. Chaque modification est signée et datée dans le journal.' : 'Votre compte est en lecture seule : demandez à un administrateur un accès « Éditeur » pour modifier.';
     $('#j-g').innerHTML = '<option value="">Tous les dossiers</option>' + G.map(g => `<option value="${g.k}">${esc(g.s)}</option>`).join('');
@@ -984,6 +992,7 @@ body { margin: 0; min-height: 100vh; }
   async function loadLog() {
     const q = { limit: 300 };
     if ($('#j-user').value) q.user = $('#j-user').value;
+    if (isAdmin() && $('#j-kind').value) q.kind = $('#j-kind').value;
     if ($('#j-g').value) q.g = $('#j-g').value;
     try { const r = await api('log', undefined, q); LOG = r.log; LOGDEL = new Set(r.deleted); renderJournal(); }
     catch (e) { $('#journal').innerHTML = `<li><span></span><span class="hint">${esc(e.error)}</span></li>`; }
@@ -997,6 +1006,7 @@ body { margin: 0; min-height: 100vh; }
       let restore = '';
       if (l.act === 'delete' && LOGDEL.has(l.tid) && !seen.has(l.tid) && canEdit()) restore = `<div class="act"><button type="button" class="btn ghost" data-restore="${esc(l.tid)}">Rétablir cette action</button></div>`;
       if (l.act === 'delete') seen.add(l.tid);
+      if (l.act === 'login') return `<li><span class="who-av" aria-hidden="true">${esc(initials(l.who))}</span><div><div class="h"><b>${esc(l.who)}</b> s’est connecté(e)</div><div class="t">${esc(fdt(l.at))}</div></div></li>`;
       return `<li><span class="who-av" aria-hidden="true">${esc(initials(l.who))}</span><div><div class="h"><b>${esc(l.who)}</b> ${VERB[l.act] || 'a modifié'} ${tag(l.g)} <b>${esc(l.t)}</b></div><div class="t">${esc(fdt(l.at))}</div>${chList(l)}${restore}</div></li>`;
     }).join('');
   }
@@ -1007,6 +1017,7 @@ body { margin: 0; min-height: 100vh; }
     catch (err) { b.disabled = false; setStatus('warn', esc(err.error)); }
   });
   $('#j-user').addEventListener('change', loadLog);
+  $('#j-kind').addEventListener('change', loadLog);
   $('#j-g').addEventListener('change', loadLog);
 
   /* ---------- comptes ---------- */
@@ -1023,16 +1034,28 @@ body { margin: 0; min-height: 100vh; }
     w.hidden = !exposed.length;
     if (exposed.length) w.innerHTML = `<b>Attention : des fichiers internes sont lisibles depuis internet</b> (${exposed.map(esc).join(', ')}). Votre serveur n’applique pas les fichiers « .htaccess ». Suivez la section « Serveur Nginx » du guide d’installation, ou placez le dossier de données hors du site (réglage « data_dir » dans inc/config.php).`;
   }
+  function mailHref(u, temp) {
+    const pw = temp ? `Mot de passe provisoire : ${temp}\n\nÀ ta première connexion, tu choisiras ton propre mot de passe.` : `Mot de passe : celui que tu as choisi (si tu l’as oublié, dis-le-moi et je t’en redonne un).`;
+    const body = `Bonjour,\n\nTon accès au planning Initiatives-Cœur 2027 est ouvert :\n\nAdresse : ${APPURL}\nIdentifiant : ${u.login}\n${pw}\n\nTu peux changer ton mot de passe à tout moment avec « Mon mot de passe », en haut à droite de la page.\n\nÀ bientôt`;
+    return 'mailto:' + encodeURIComponent(u.email || '') + '?subject=' + encodeURIComponent('Ton accès au planning Initiatives-Cœur 2027') + '&body=' + encodeURIComponent(body);
+  }
   function userRow(u) {
     const st = !u.active ? '<span class="pill off">désactivé</span>' : (u.must_change ? '<span class="pill warn">mot de passe provisoire</span>' : '<span class="pill">actif</span>');
     const self = u.id === ME.id;
     let actions = `<button type="button" class="linkbtn" data-uedit="${u.id}">Modifier</button>`;
-    if (!self) {
-      actions += state.uReset === u.id
-        ? `<span class="confirm">Générer un nouveau mot de passe ?<button type="button" class="btn danger" data-ureset-yes="${u.id}">Oui</button><button type="button" class="btn ghost" data-ureset-no="1">Non</button></span>`
-        : `<button type="button" class="linkbtn" data-ureset="${u.id}">Nouveau mot de passe</button><button type="button" class="linkbtn" data-utoggle="${u.id}">${u.active ? 'Désactiver' : 'Réactiver'}</button>`;
-    }
-    return `<tr><td><b>${esc(u.name)}</b>${self ? ' <span class="hint">(vous)</span>' : ''}${u.email ? `<br><span class="hint">${esc(u.email)}</span>` : ''}</td><td class="mono">${esc(u.login)}</td><td><span class="pill${u.role === 'admin' ? ' admin' : ''}">${ROLE[u.role]}</span></td><td class="d">${u.last_login ? esc(fdt(u.last_login)) : 'jamais'}</td><td>${st}</td><td class="e">${actions}</td></tr>`;
+    if (!self) actions += (u.email ? `<a class="linkbtn mailbtn" href="${esc(mailHref(u, u.temp))}">Mail</a>` : `<span class="hint" title="Ajoutez un e-mail avec « Modifier »">Mail (e-mail manquant)</span>`) + `<button type="button" class="linkbtn" data-ureset="${u.id}">Changer le mot de passe</button><button type="button" class="linkbtn" data-utoggle="${u.id}">${u.active ? 'Désactiver' : 'Réactiver'}</button>`;
+    let pw = '<span class="hint">choisi par la personne (non visible)</span>';
+    if (u.temp) pw = state.uShow === u.id
+      ? `<code class="pwd">${esc(u.temp)}</code> <button type="button" class="linkbtn" data-uhide="1">Masquer</button>`
+      : `<span class="mono">••••••••</span> <button type="button" class="linkbtn" data-ushow="${u.id}">Voir</button>`;
+    let row = `<tr><td><b>${esc(u.name)}</b>${self ? ' <span class="hint">(vous)</span>' : ''}${u.email ? `<br><span class="hint">${esc(u.email)}</span>` : ''}</td><td class="mono">${esc(u.login)}</td><td><span class="pill${u.role === 'admin' ? ' admin' : ''}">${ROLE[u.role]}</span></td><td class="d">${u.last_login ? esc(fdt(u.last_login)) : 'jamais'}</td><td>${st}<br><span class="pwline">${pw}</span></td><td class="e">${actions}</td></tr>`;
+    if (state.uReset === u.id) row += `<tr class="editing"><td colspan="6"><form class="form" id="u-pw" data-id="${u.id}" novalidate>
+      <label class="wide">Nouveau mot de passe pour ${esc(u.name)} (10 caractères minimum) — laissez vide pour en générer un automatiquement<input type="text" id="up-pass" autocomplete="off" spellcheck="false" autocapitalize="none" maxlength="200"></label>
+      <label class="check wide"><input type="checkbox" id="up-must" checked> Lui demander d’en choisir un autre à sa prochaine connexion</label>
+      <p class="msg" id="up-msg" hidden></p>
+      <div class="actions"><button type="submit" class="btn">Changer le mot de passe</button><button type="button" class="btn ghost" data-ureset-no="1">Annuler</button></div>
+    </form></td></tr>`;
+    return row;
   }
   function userEditRow(u) {
     return `<tr class="editing"><td colspan="6"><form class="form" id="u-edit" data-id="${u.id}" novalidate>
@@ -1046,6 +1069,15 @@ body { margin: 0; min-height: 100vh; }
   }
   function renderUsers() {
     $('#users tbody').innerHTML = USERS.map(u => userRow(u) + (state.uEdit === u.id ? userEditRow(u) : '')).join('');
+    const pf = $('#u-pw');
+    if (pf) pf.addEventListener('submit', async e => {
+      e.preventDefault();
+      const u = USERS.find(x => x.id === +pf.dataset.id), m = $('#up-msg');
+      try {
+        const r = await api('user_reset', { id: u.id, password: $('#up-pass').value, must_change: $('#up-must').checked });
+        state.uReset = null; showTemp(u, r.temp, false); await loadUsers();
+      } catch (err) { m.hidden = false; m.textContent = err.error; }
+    });
     const f = $('#u-edit');
     if (f) {
       $('#ue-cancel').onclick = () => { state.uEdit = null; renderUsers(); };
@@ -1064,9 +1096,9 @@ body { margin: 0; min-height: 100vh; }
   function showTemp(u, temp, isNew) {
     const box = $('#temp');
     box.hidden = false;
-    box.innerHTML = `<div>${isNew ? 'Compte créé pour' : 'Nouveau mot de passe provisoire pour'} <b>${esc(u.name)}</b>. Transmettez-lui ces informations ; le mot de passe ne sera plus affiché, et il lui sera demandé d’en choisir un à sa première connexion.</div>
+    box.innerHTML = `<div>${isNew ? 'Compte créé pour' : 'Nouveau mot de passe provisoire pour'} <b>${esc(u.name)}</b>. Transmettez-lui ces informations. Ce mot de passe reste visible dans la liste ci-dessous tant que la personne ne l’a pas remplacé par le sien.</div>
       <div class="row">Adresse : <code>${esc(APPURL)}</code></div>
-      <div class="row">Identifiant : <code>${esc(u.login)}</code> Mot de passe provisoire : <code id="temp-pass">${esc(temp)}</code><button type="button" class="btn ghost" id="temp-copy">Copier le message</button></div>`;
+      <div class="row">Identifiant : <code>${esc(u.login)}</code> Mot de passe provisoire : <code id="temp-pass">${esc(temp)}</code><button type="button" class="btn ghost" id="temp-copy">Copier le message</button>${u.email ? `<a class="btn" href="${esc(mailHref(u, temp))}">Envoyer par mail</a>` : '<span class="hint">Ajoutez un e-mail au compte pour l’envoyer par mail.</span>'}</div>`;
     $('#temp-copy').onclick = async () => {
       const txt = `Bonjour,\nVoici ton accès au planning Initiatives-Cœur 2027 :\nAdresse : ${APPURL}\nIdentifiant : ${u.login}\nMot de passe provisoire : ${temp}\nTu choisiras ton propre mot de passe à la première connexion.`;
       try { await navigator.clipboard.writeText(txt); $('#temp-copy').textContent = 'Copié'; } catch (e) { const r = document.createRange(); r.selectNodeContents($('#temp-pass')); getSelection().removeAllRanges(); getSelection().addRange(r); $('#temp-copy').textContent = 'Sélectionné : faites Cmd+C'; }
@@ -1093,11 +1125,8 @@ body { margin: 0; min-height: 100vh; }
     if (t.dataset.uedit) { state.uEdit = +t.dataset.uedit; state.uReset = null; renderUsers(); return; }
     if (t.dataset.ureset) { state.uReset = +t.dataset.ureset; renderUsers(); return; }
     if (t.dataset.uresetNo) { state.uReset = null; renderUsers(); return; }
-    if (t.dataset.uresetYes) {
-      const u = USERS.find(x => x.id === +t.dataset.uresetYes);
-      try { const r = await api('user_reset', { id: u.id }); state.uReset = null; showTemp(u, r.temp, false); await loadUsers(); } catch (err) { setStatus('warn', esc(err.error)); }
-      return;
-    }
+    if (t.dataset.ushow) { state.uShow = +t.dataset.ushow; renderUsers(); return; }
+    if (t.dataset.uhide) { state.uShow = null; renderUsers(); return; }
     if (t.dataset.utoggle) {
       const u = USERS.find(x => x.id === +t.dataset.utoggle);
       try { await api('user_save', { ...u, active: u.active ? 0 : 1 }); await loadUsers(); } catch (err) { setStatus('warn', esc(err.error)); }
