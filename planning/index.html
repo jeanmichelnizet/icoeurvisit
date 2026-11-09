@@ -299,7 +299,12 @@ code.pwd{font-family:var(--f-data);font-size:13px;background:var(--edit-bg);bord
 a.linkbtn{font-size:13px}
 #users td.e a.linkbtn,#users td.e .hint{margin-left:10px}
 a.btn{text-decoration:none;display:inline-block}
-#users td.e{white-space:normal}
+#users td.e{white-space:normal;width:auto;text-align:left}
+.uacts{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.ubtn{font:inherit;font-size:12.5px;font-weight:600;white-space:nowrap;color:var(--ink);background:var(--surface);border:1px solid var(--base);border-radius:6px;padding:4px 10px;cursor:pointer;text-decoration:none;display:inline-block;line-height:1.4}
+.ubtn.primary{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.ubtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:720px){.uacts{justify-content:flex-start}}
 </style>
 </head>
 <body>
@@ -1042,13 +1047,15 @@ a.btn{text-decoration:none;display:inline-block}
   function userRow(u) {
     const st = !u.active ? '<span class="pill off">désactivé</span>' : (u.must_change ? '<span class="pill warn">mot de passe provisoire</span>' : '<span class="pill">actif</span>');
     const self = u.id === ME.id;
-    let actions = `<button type="button" class="linkbtn" data-uedit="${u.id}">Modifier</button>`;
-    if (!self) actions += (u.email ? `<a class="linkbtn mailbtn" href="${esc(mailHref(u, u.temp))}">Mail</a>` : `<span class="hint" title="Ajoutez un e-mail avec « Modifier »">Mail (e-mail manquant)</span>`) + `<button type="button" class="linkbtn" data-ureset="${u.id}">Changer le mot de passe</button><button type="button" class="linkbtn" data-utoggle="${u.id}">${u.active ? 'Désactiver' : 'Réactiver'}</button>`;
-    let pw = '<span class="hint">choisi par la personne (non visible)</span>';
+    let actions = '';
+    if (!self) actions += (u.email ? `<a class="ubtn mailbtn primary" href="${esc(mailHref(u, u.temp))}">✉ Mail</a>` : `<button type="button" class="ubtn" data-uedit="${u.id}" title="Ajoutez d’abord une adresse e-mail">✉ Mail : ajouter l’e-mail</button>`) + `<button type="button" class="ubtn" data-ureset="${u.id}">Changer le mot de passe</button>`;
+    actions += `<button type="button" class="ubtn" data-uedit="${u.id}">Modifier</button>`;
+    if (!self) actions += `<button type="button" class="ubtn" data-utoggle="${u.id}">${u.active ? 'Désactiver' : 'Réactiver'}</button>`;
+    let pw = u.must_change ? '<span class="hint">provisoire, non conservé : cliquez sur « Changer le mot de passe » pour en définir un visible</span>' : '<span class="hint">choisi par la personne (non visible)</span>';
     if (u.temp) pw = state.uShow === u.id
       ? `<code class="pwd">${esc(u.temp)}</code> <button type="button" class="linkbtn" data-uhide="1">Masquer</button>`
       : `<span class="mono">••••••••</span> <button type="button" class="linkbtn" data-ushow="${u.id}">Voir</button>`;
-    let row = `<tr><td><b>${esc(u.name)}</b>${self ? ' <span class="hint">(vous)</span>' : ''}${u.email ? `<br><span class="hint">${esc(u.email)}</span>` : ''}</td><td class="mono">${esc(u.login)}</td><td><span class="pill${u.role === 'admin' ? ' admin' : ''}">${ROLE[u.role]}</span></td><td class="d">${u.last_login ? esc(fdt(u.last_login)) : 'jamais'}</td><td>${st}<br><span class="pwline">${pw}</span></td><td class="e">${actions}</td></tr>`;
+    let row = `<tr><td><b>${esc(u.name)}</b>${self ? ' <span class="hint">(vous)</span>' : ''}${u.email ? `<br><span class="hint">${esc(u.email)}</span>` : ''}</td><td class="mono">${esc(u.login)}</td><td><span class="pill${u.role === 'admin' ? ' admin' : ''}">${ROLE[u.role]}</span></td><td class="d">${u.last_login ? esc(fdt(u.last_login)) : 'jamais'}</td><td>${st}<br><span class="pwline">${pw}</span></td><td class="e"><div class="uacts">${actions}</div></td></tr>`;
     if (state.uReset === u.id) row += `<tr class="editing"><td colspan="6"><form class="form" id="u-pw" data-id="${u.id}" novalidate>
       <label class="wide">Nouveau mot de passe pour ${esc(u.name)} (10 caractères minimum) — laissez vide pour en générer un automatiquement<input type="text" id="up-pass" autocomplete="off" spellcheck="false" autocapitalize="none" maxlength="200"></label>
       <label class="check wide"><input type="checkbox" id="up-must" checked> Lui demander d’en choisir un autre à sa prochaine connexion</label>
