@@ -331,6 +331,7 @@ body { margin: 0; min-height: 100vh; }
       <a href="#pert" data-v="pert">PERT</a>
       <a href="#liste" data-v="liste">Liste<span class="xl"> et modifications</span></a>
       <a href="#journal" data-v="journal">Journal</a>
+      <a href="#ensemble" data-v="ensemble">Vue d’ensemble</a>
       <a href="#comptes" data-v="comptes" id="tab-comptes" hidden>Comptes</a>
     </nav>
     <div class="chips" id="chips" role="group" aria-label="Dossiers affichés"></div>
@@ -384,6 +385,11 @@ body { margin: 0; min-height: 100vh; }
       <label class="field">Dossier <select id="j-g"><option value="">Tous les dossiers</option></select></label>
     </div>
     <ol class="journal" id="journal"></ol>
+  </section>
+
+  <section class="view" id="v-ensemble" aria-labelledby="h-ensemble" hidden>
+    <div class="view-head"><div><h2 id="h-ensemble">Vue d’ensemble de la saison</h2><p>La première synthèse de la saison 2027 (frise, cartes des parcours, fiches par événement), établie le 9 novembre 2026. C’est une photographie à cette date : elle n’est pas modifiable et ne suit pas les changements faits dans la liste.</p></div></div>
+    <div class="panel" id="ens-wrap" style="padding:0;overflow:hidden"><p class="hint" id="ens-msg" style="padding:16px 18px;margin:0">Chargement…</p><iframe id="ens-frame" title="Vue d’ensemble de la saison 2027" sandbox="allow-scripts allow-popups" hidden style="display:block;width:100%;height:82vh;border:0;background:#fff"></iframe></div>
   </section>
 
   <section class="view" id="v-comptes" aria-labelledby="h-comptes" hidden>
@@ -1120,15 +1126,27 @@ body { margin: 0; min-height: 100vh; }
     } catch (err) { m.textContent = err.error; }
   });
 
+  /* ---------- vue d'ensemble ---------- */
+  let overviewLoaded = false;
+  async function loadOverview() {
+    if (overviewLoaded) return;
+    try {
+      const r = await api('overview');
+      const fr = $('#ens-frame');
+      fr.srcdoc = '<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><base target="_blank"><style>body{margin:0}</style></head><body>' + r.html + '</body></html>';
+      fr.hidden = false; $('#ens-msg').hidden = true; overviewLoaded = true;
+    } catch (e) { $('#ens-msg').textContent = e.error || 'La vue d’ensemble n’a pas pu être chargée.'; }
+  }
+
   /* ---------- vues ---------- */
-  const VIEWS = ['planning', 'pert', 'liste', 'journal', 'comptes', 'compte'];
+  const VIEWS = ['planning', 'pert', 'liste', 'journal', 'ensemble', 'comptes', 'compte'];
   function setView() {
     let v = (location.hash || '#planning').slice(1);
     if (!VIEWS.includes(v) || (v === 'comptes' && !isAdmin())) v = 'planning';
     state.view = v;
     document.querySelectorAll('.tabs a').forEach(a => { if (a.dataset.v === v) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     VIEWS.forEach(k => { $('#v-' + k).hidden = k !== v; });
-    const admin = v === 'comptes' || v === 'compte';
+    const admin = v === 'comptes' || v === 'compte' || v === 'ensemble';
     $('#chips').hidden = admin || v === 'journal';
     document.querySelector('#app > header').hidden = admin;
     document.querySelector('#app > .soon').hidden = admin;
@@ -1142,6 +1160,7 @@ body { margin: 0; min-height: 100vh; }
     else if (v === 'liste') renderList();
     else if (v === 'journal') { renderJournal(); if (LOADED) loadLog(); }
     else if (v === 'comptes') loadUsers();
+    else if (v === 'ensemble') loadOverview();
   }
   addEventListener('hashchange', () => { if (ME) setView(); });
   let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (ME && state.view === 'planning') renderGantt(); }, 150); });
