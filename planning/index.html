@@ -294,6 +294,7 @@ body { margin: 0; min-height: 100vh; }
 .auth .linkbtn { font-size: 13px; }
 .auth .msg.info { color: var(--ink-2); }
 
+@media (max-width:720px){.bar{display:grid;grid-template-columns:minmax(0,1fr)}.tabs{display:flex;max-width:100%;overflow-x:auto;scrollbar-width:none}.tabs a{white-space:nowrap;flex:none}}
 code.pwd{font-family:var(--f-data);font-size:13px;background:var(--edit-bg);border:1px solid var(--hair);border-radius:4px;padding:1px 6px;user-select:all}
 .pwline{font-size:12.5px;display:inline-block;margin-top:4px}
 a.linkbtn{font-size:13px}
@@ -324,18 +325,6 @@ a.btn{text-decoration:none;display:inline-block}
     <div class="user" id="user"></div>
   </div>
 
-  <header>
-    <h1>Planning général 2027</h1>
-    <p class="lede">Les seize dossiers de la saison sur une même échelle de temps, des bilans de novembre 2026 à la fin de la saison 2027. Chaque couleur est une famille de dossiers ; les hachures distinguent les dossiers qui partagent une couleur. <b id="kpi"></b></p>
-  </header>
-
-  <div class="status" id="status" role="status"><i class="dot"></i><span id="status-t">Chargement…</span></div>
-
-  <section class="soon" aria-labelledby="soon-h">
-    <div class="soon-head"><h2 id="soon-h">Les trois prochaines semaines</h2><p id="soon-sub"></p></div>
-    <ol id="soon"></ol>
-  </section>
-
   <div class="bar">
     <nav class="tabs" aria-label="Vues">
       <a href="#planning" data-v="planning">Planning</a>
@@ -347,6 +336,19 @@ a.btn{text-decoration:none;display:inline-block}
     </nav>
     <div class="chips" id="chips" role="group" aria-label="Dossiers affichés"></div>
   </div>
+
+  <div class="status" id="status" role="status"><i class="dot"></i><span id="status-t">Chargement…</span></div>
+
+  <header>
+    <h1>Planning général 2027</h1>
+    <p class="lede">Les seize dossiers de la saison sur une même échelle de temps, des bilans de novembre 2026 à la fin de la saison 2027. Chaque couleur est une famille de dossiers ; les hachures distinguent les dossiers qui partagent une couleur. <b id="kpi"></b></p>
+  </header>
+
+
+  <section class="soon" aria-labelledby="soon-h">
+    <div class="soon-head"><h2 id="soon-h">Les trois prochaines semaines</h2><p id="soon-sub"></p></div>
+    <ol id="soon"></ol>
+  </section>
 
   <section class="view" id="v-planning" aria-labelledby="h-planning">
     <div class="view-head">
@@ -1184,8 +1186,8 @@ a.btn{text-decoration:none;display:inline-block}
     VIEWS.forEach(k => { $('#v-' + k).hidden = k !== v; });
     const admin = v === 'comptes' || v === 'compte' || v === 'ensemble';
     $('#chips').hidden = admin || v === 'journal';
-    document.querySelector('#app > header').hidden = admin;
-    document.querySelector('#app > .soon').hidden = admin;
+    document.querySelector('#app > header').hidden = v !== 'planning';
+    document.querySelector('#app > .soon').hidden = v !== 'planning';
     hideTip(); renderView();
   }
   function renderView() {
